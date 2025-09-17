@@ -54,12 +54,12 @@ async function initPage() {
     
     try {
 
-        const response = await fetch('http://localhost:3000/player/info');
+        const response = await fetch('/player/info');
         const data = await response.json();
         playerInfo = data;
         console.log(data);
 
-        const response1 = await fetch('http://localhost:3000/player/allPlayerInfo')
+        const response1 = await fetch('/player/allPlayerInfo')
         const data1 = await response1.json();
         console.log(data1);
         players = data1.map((element, index) => ({
@@ -70,7 +70,7 @@ async function initPage() {
         }));
 
 
-        const response2 = await fetch('http://localhost:3000/register/check-register')
+        const response2 = await fetch('/register/check-register')
         playerRegistrationStatus = await response2.json();
         console.log(playerRegistrationStatus);
 
@@ -495,7 +495,7 @@ registerTypeBtns.forEach(btn => {
 // Confirm singles registration
 confirmSingles.addEventListener('click', async() => {
     try {
-        const response = await fetch("http://localhost:3000/register/single-register")
+        const response = await fetch("/register/single-register")
         const data = await response.json();
         if(data.success){
             playerRegistrationStatus.singles = true;
@@ -541,7 +541,7 @@ confirmDoubles.addEventListener('click', async() => {
         let email2 = partner.email;
         let email1 = playerInfo.email;
         let gender = playerInfo.gender;
-        const response = await fetch("http://localhost:3000/register/double-register", {
+        const response = await fetch("/register/double-register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({tname, email2, email1, gender}),
@@ -610,10 +610,10 @@ logoutBtn.forEach(btn => {
 
 document.getElementById('confirmLogout').addEventListener('click', async() => {
     try {
-        const response = await fetch('http://localhost:3000/auth/logout');
+        const response = await fetch('/auth/logout');
         const data = await response.json();
         if(data.success){
-            window.location.href = 'http://localhost:3000';
+            window.location.href = '/';
         } else {
             showNotification('Logout failed. Please try again.', 'error');
         }

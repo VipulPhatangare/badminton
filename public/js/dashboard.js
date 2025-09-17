@@ -111,7 +111,7 @@ const dummy1 = [
 
 async function takePlayerInfo() {
     try {
-        const response = await fetch('http://localhost:3000/dashboard/players-info');
+        const response = await fetch('/dashboard/players-info');
         const data = await response.json();
         
         centralObj.players = data.players;

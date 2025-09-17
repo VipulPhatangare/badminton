@@ -89,7 +89,7 @@ sendOtp.addEventListener('click', async() => {
         
         try {
            
-            const response = await fetch('http://localhost:3000/auth/send-otp', {
+            const response = await fetch('/auth/send-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ document.getElementById('resendOtp').addEventListener('click',async (e) => {
         
         try {
            
-            const response = await fetch('http://localhost:3000/auth/send-otp', {
+            const response = await fetch('/auth/send-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -160,7 +160,7 @@ document.getElementById('verifyOtp').addEventListener('click', async() => {
     try {
         if (otp) {
             if (otp.length == 6) {
-                const res = await fetch("http://localhost:3000/auth/verify-otp", {
+                const res = await fetch("/auth/verify-otp", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({email, otp}),
@@ -228,7 +228,7 @@ loginForm.addEventListener('submit', async (e) => {
         }
 
         if (loginEmail && loginEmail.endsWith('@pccoepune.org')){
-            const res = await fetch("http://localhost:3000/auth/login", {
+            const res = await fetch("/auth/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -243,9 +243,9 @@ loginForm.addEventListener('submit', async (e) => {
                     showNotification(data.message, 'success');
                     loginModal.classList.remove('active');
                     if(admin){
-                        document.location.href = 'http://localhost:3000/admin';
+                        document.location.href = '/admin';
                     }else{
-                        document.location.href = 'http://localhost:3000/player';
+                        document.location.href = '/player';
                     }
                     
                 }else{
@@ -380,7 +380,7 @@ signUpBtn.addEventListener('click', async() => {
         stdData.email = email;
         stdData.gender = gender;
         
-        const response = await fetch("http://localhost:3000/signupData/storeData", {
+        const response = await fetch("/signupData/storeData", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(stdData),
@@ -403,7 +403,7 @@ signUpBtn.addEventListener('click', async() => {
             document.getElementById('resendOtp').style.display = 'none';
             document.getElementById('otp').disabled = true;
 
-            document.location.href = 'http://localhost:3000/player';
+            document.location.href = '/player';
 
         } else {
             showNotification(data.message || 'Registration failed. Please try again.', 'error');
@@ -469,7 +469,7 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
         
         try {
 
-            const response = await fetch("http://localhost:3000/auth/send-pass", {
+            const response = await fetch("/auth/send-pass", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({resetEmail}),

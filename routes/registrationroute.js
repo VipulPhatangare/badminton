@@ -13,6 +13,14 @@ router.get('/single-register', async (req, res) => {
         }
         const playerInformation = await playerInfo.findOne({email});
         let gender = playerInformation.gender; 
+        let registerType = '';
+        
+        await playerInfo.findOneAndUpdate(
+            { email: email },
+            { $set: { singles: true } },
+            { new: true } 
+        );
+
         const player = new registerSingles({ email, gender});
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
@@ -37,7 +45,20 @@ router.post('/double-register', async (req, res) => {
             return res.status(400).json({ success: false, message: "Team already registered." });
         }
 
-        const player = new registerDoubles({ teamName, email1, email2 });
+
+        await playerInfo.findOneAndUpdate(
+            { email: email1 },
+            { $set: { doubles: true} },
+            { new: true } 
+        );
+
+        await playerInfo.findOneAndUpdate(
+            { email: email2 },
+            { $set: { doubles: true} },
+            { new: true } 
+        );
+
+        const player = new registerDoubles({ teamName, email1, email2, gender });
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
     } catch (error) {

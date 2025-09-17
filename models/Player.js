@@ -8,7 +8,9 @@ const playerInfoSchema = new mongoose.Schema({
     email: String,
     prn: String,
     year: String,
-    branch: String
+    branch: String,
+    doubles: Boolean,
+    singles: Boolean
 });
 
 const playerInfo = mongoose.model('playerInfo', playerInfoSchema);

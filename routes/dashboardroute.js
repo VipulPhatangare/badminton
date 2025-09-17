@@ -27,4 +27,13 @@ router.get('/players-info', async(req, res)=>{
     }
 });
 
+
+router.get('/player-section-info', async(req, res)=>{
+    try {
+        
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 module.exports = router;

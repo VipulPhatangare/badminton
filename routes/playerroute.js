@@ -29,7 +29,8 @@ router.get('/allPlayerInfo', async (req, res) => {
     // Query: same gender, exclude the current player's email
     const players = await playerInfo.find({
       email: { $ne: email },             // Exclude current player's email
-      gender: currentPlayer.gender       // Match same gender
+      gender: currentPlayer.gender,   
+      doubles: false
     });
 
     res.json(players);

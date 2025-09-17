@@ -379,7 +379,8 @@ signUpBtn.addEventListener('click', async() => {
         stdData.year = year;
         stdData.email = email;
         stdData.gender = gender;
-        
+        stdData.singles = false;
+        stdData.doubles = false;
         const response = await fetch("/signupData/storeData", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

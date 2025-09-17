@@ -253,18 +253,25 @@ async function takePlayerInfo() {
 
             dashboardUpcomingMatches.innerHTML = tableContent;
         }
-
-
-
     } catch (error) {
         console.error(error);
     }
 }
+
+async function playersSectionInfo() {
+    try {
+        const response = await fetch('/dashboard/player-section-info');
+        const data = await response.json();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
 function filterMatchesByCategory() {
     const selectedCategory = document.getElementById('matchCategoryFilter').value;
     const table = document.querySelector('#dashboardUpcomingMatches table tbody');
     
-    // Clear existing table content
     table.innerHTML = '';
     
     // Filter matches if a specific category is selected

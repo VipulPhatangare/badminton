@@ -46,6 +46,14 @@ app.get("/", (req, res) => {
   }
 });
 
+app.get('/refree',(req, res)=>{
+  res.render('refree');
+});
+
+app.get('/scorecard',(req, res)=>{
+  res.render('scorecard');
+});
+
 app.get("/player", (req, res) => {
   res.render("player");
 });

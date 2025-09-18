@@ -1,6 +1,84 @@
-
 const centralObj = {};
 
+// Player management functionality
+let currentPlayer = null;
+let currentAction = null;
+let currentCategory = null;
+
+// Function to show confirmation modal
+function showConfirmationModal(title, message, action) {
+    currentAction = action;
+    document.getElementById('confirmationTitle').textContent = title;
+    document.getElementById('confirmationMessage').textContent = message;
+    document.getElementById('confirmationModal').classList.add('active');
+}
+
+// Function to handle player deregistration
+function deregisterPlayer(player, category) {
+    const categoryText = category === 'singles' ? 'Singles' : 'Doubles';
+    
+    showConfirmationModal(
+        `Deregister from ${categoryText}`, 
+        `Are you sure you want to deregister ${player.name} from ${categoryText}?`,
+        () => {
+            // Send deregister request to server
+            fetch('/dashboard/deregister-player', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    email: player.email, 
+                    category: category 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    takePlayerInfo(); // Refresh the player list
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deregistering player');
+            });
+        }
+    );
+}
+
+// Function to handle player deletion
+function deletePlayer(player) {
+    showConfirmationModal(
+        "Delete Player", 
+        `Are you sure you want to delete ${player.name}'s profile? This action cannot be undone.`,
+        () => {
+            // Send delete request to server
+            fetch('/dashboard/delete-player', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: player.email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isDelete) {
+                    alert(data.message);
+                    takePlayerInfo();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting player');
+            });
+        }
+    );
+}
 
 // 🏸 Dummy data for Boys Singles Matches
 const dummy1 = [
@@ -106,9 +184,6 @@ const dummy1 = [
   }
 ];
 
-
-
-
 async function takePlayerInfo() {
     try {
         const response = await fetch('/dashboard/players-info');
@@ -184,7 +259,6 @@ async function takePlayerInfo() {
                     </div>
         `;
 
-
         dashboardUpcomingMatches = document.getElementById('dashboardUpcomingMatches');
         dashboardUpcomingMatches.innerHTML = '';
         // centralObj.totalUpcomingMatches = dummy1;
@@ -258,15 +332,112 @@ async function takePlayerInfo() {
     }
 }
 
-async function playersSectionInfo() {
+function playersSectionInfo() {
     try {
-        const response = await fetch('/dashboard/player-section-info');
-        const data = await response.json();
+        playerSectionTbody = document.getElementById('playerSectionTbody');
+        playerSectionTbody.innerHTML = ''; // Clear existing content
+        
+        centralObj.players.forEach(element => {
+            if(element.singles || element.doubles){
+                const trTag = document.createElement('tr');
+                let category = '';
+                if(element.gender == 'Male'){
+                    if(element.singles && element.doubles){
+                        category = 'Boys Singles, Boys Doubles';
+                    }else if(element.singles){
+                        category = 'Boys Singles';
+                    }else{
+                        category = 'Boys Doubles';
+                    }
+                }else{
+                    if(element.singles && element.doubles){
+                        category = 'Girls Singles, Girls Doubles';
+                    }else if(element.singles){
+                        category = 'Girls Singles';
+                    }else{
+                        category = 'Girls Doubles';
+                    }
+                }
+                let year = '';
+                if(element.year == 'FE'){
+                    year = 'First Year';
+                }else if(element.year == 'SE'){
+                    year = 'Second Year';
+                }else if(element.year == 'TE'){
+                    year = 'Third Year';
+                }else if(element.year == 'BE'){
+                    year = 'Final Year';
+                }
+
+                trTag.innerHTML = `
+                                    <td>${element.name}</td>
+                                    <td>${element.phone}</td>
+                                    <td>${element.email}</td>
+                                    <td>${element.branch}</td>
+                                    <td>${year}</td>
+                                    <td>${category}</td>
+                                    <td>
+                                        <div class="action-buttons-container">
+                                            <button class="action-btn btn-delete-singles" data-email="${element.email}" ${!element.singles ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                                <i class="fas fa-user-minus"></i> Singles
+                                            </button>
+                                            <button class="action-btn btn-delete-doubles" data-email="${element.email}" ${!element.doubles ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                                <i class="fas fa-users-slash"></i> Doubles
+                                            </button>
+                                            <button class="action-btn btn-delete-profile" data-email="${element.email}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                `;
+
+                playerSectionTbody.appendChild(trTag);
+            }
+        });
+
+        // Set up filter event listeners
+        document.getElementById('branchFilter').addEventListener('change', filterPlayers);
+        document.getElementById('yearFilter').addEventListener('change', filterPlayers);
+        document.getElementById('playerSearch').addEventListener('input', filterPlayers);
+
     } catch (error) {
         console.log(error);
     }
 }
 
+function filterPlayers() {
+    const branchFilter = document.getElementById('branchFilter').value;
+    const yearFilter = document.getElementById('yearFilter').value;
+    const searchTerm = document.getElementById('playerSearch').value.toLowerCase();
+    
+    const playerRows = document.querySelectorAll('#playerSectionTbody tr');
+    
+    playerRows.forEach(row => {
+        const branch = row.cells[3].textContent;
+        const year = row.cells[4].textContent;
+        const name = row.cells[0].textContent.toLowerCase();
+        const email = row.cells[2].textContent.toLowerCase();
+        
+        let showRow = true;
+        
+        // Apply branch filter
+        if (branchFilter !== 'all' && branch !== branchFilter) {
+            showRow = false;
+        }
+        
+        // Apply year filter
+        if (yearFilter !== 'all' && year !== yearFilter) {
+            showRow = false;
+        }
+        
+        // Apply search filter
+        if (searchTerm && !name.includes(searchTerm) && !email.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+    });
+}
 
 function filterMatchesByCategory() {
     const selectedCategory = document.getElementById('matchCategoryFilter').value;
@@ -303,13 +474,57 @@ document.addEventListener('DOMContentLoaded', async()=>{
     if (categoryFilter) {
         categoryFilter.addEventListener('change', filterMatchesByCategory);
     }
+    playersSectionInfo();
+    
+    // Confirmation modal actions
+    document.getElementById('confirmAction').addEventListener('click', function() {
+        if (currentAction) {
+            currentAction();
+        }
+        document.getElementById('confirmationModal').classList.remove('active');
+    });
+    
+    document.getElementById('cancelAction').addEventListener('click', function() {
+        document.getElementById('confirmationModal').classList.remove('active');
+    });
+    
+    // Close modals
+    document.querySelectorAll('.close-modal').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function() {
+            this.closest('.modal-overlay').classList.remove('active');
+        });
+    });
+    
+    // Add event listeners to action buttons using event delegation
+    document.addEventListener('click', function(e) {
+        // Singles deregister button
+        if (e.target.closest('.btn-delete-singles')) {
+            const email = e.target.closest('.btn-delete-singles').getAttribute('data-email');
+            const player = centralObj.players.find(p => p.email === email);
+            if (player) {
+                deregisterPlayer(player, 'singles');
+            }
+        }
+        
+        // Doubles deregister button
+        if (e.target.closest('.btn-delete-doubles')) {
+            const email = e.target.closest('.btn-delete-doubles').getAttribute('data-email');
+            const player = centralObj.players.find(p => p.email === email);
+            if (player) {
+                deregisterPlayer(player, 'doubles');
+            }
+        }
+        
+        // Delete profile button
+        if (e.target.closest('.btn-delete-profile')) {
+            const email = e.target.closest('.btn-delete-profile').getAttribute('data-email');
+            const player = centralObj.players.find(p => p.email === email);
+            if (player) {
+                deletePlayer(player);
+            }
+        }
+    });
 });
-
-
-
-
-
-
 
 const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.getElementById('sidebar');

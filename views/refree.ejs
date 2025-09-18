@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referee Dashboard - Badminton Scorecard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --sidebar-width: 250px;
+            --header-height: 70px;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            left: 0; /* Show on left side */
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width); /* Add margin for sidebar */
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px; /* Hide on mobile by default */
+            }
+            .sidebar.active {
+                left: 0; /* Show when active on mobile */
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .main-content.sidebar-active {
+                margin-left: var(--sidebar-width);
+            }
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left-color: var(--secondary);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            transition: var(--transition);
+        }
+
+        /* Header */
+        .header {
+            background-color: white;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: nowrap; /* Prevent wrapping */
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .schedule-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .schedule-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 30px;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            align-self: flex-end;
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        /* Section Styles */
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-danger {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: #e6f7ee;
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: #fef5e6;
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background-color: #e8f4fd;
+            color: var(--accent);
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-view {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Updated Search Box Styles */
+        .search-box {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .search-box .search-icon {
+            position: relative; 
+            left: 30px;
+            top: 8px;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+            z-index: 1;
+        }
+
+        /* Match Cards */
+        .match-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .match-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .match-card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .match-number {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .match-type {
+            background-color: var(--secondary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .match-card-body {
+            padding: 15px;
+        }
+
+        .match-players {
+            margin-bottom: 15px;
+        }
+
+        .player {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .player:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .match-details {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            transform: translateY(-50px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--secondary);
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Current Match Section */
+        .current-match {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--accent);
+        }
+
+        .go-btn {
+            background-color: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .go-btn:hover {
+            background-color: #27ae60;
+        }
+
+        /* Scorecard Styles */
+        .scorecard {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .scorecard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .scorecard-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .match-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .players-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .player-card {
+            flex: 1;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .player-card.active {
+            background-color: #e8f4fd;
+            border: 2px solid var(--accent);
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .player-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .service-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .score-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .sets-container {
+            margin-top: 20px;
+        }
+
+        .sets-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .sets-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sets-table th, .sets-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .sets-table th {
+            background-color: #f8f9fa;
+        }
+
+        .advantage-message {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 15px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .section-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .match-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .players-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Toggle for mobile sidebar */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+                order: 2;
+                position: absolute;
+                right: 20px;
+            }
+            .header {
+                justify-content: center;
+                position: relative;
+            }
+            .page-title {
+                order: 1;
+                text-align: center;
+            }
+            .header-actions {
+                order: 3;
+            }
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal {
+                padding: 20px 15px;
+            }
+            
+            .score-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* Confirmation Dialog */
+        .confirmation-dialog {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-confirm {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: #27ae60;
+        }
+
+        /* Overlay for when sidebar is open */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+        .modal-icon {
+            text-align: center;
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .logout-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            margin-top: 20px;
+            width: calc(100% - 40px);
+            margin-left: 20px;
+            margin-right: 20px;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay for sidebar -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-whistle"></i>
+                <span>Referee Hub</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="menu-item" data-page="completed-matches">
+                <i class="fas fa-history"></i>
+                <span>Completed Matches</span>
+            </div>
+            <div class="menu-item logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="page-title">Referee Dashboard</div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page">
+                <!-- Current Match Section -->
+                <div class="section current-match">
+                    <div class="section-header">
+                        <div class="section-title">Current Match</div>
+                    </div>
+                    <div class="match-card">
+                        <div class="match-card-header">
+                            <div class="match-number">Match #102</div>
+                            <div class="match-type">Boys Singles</div>
+                        </div>
+                        <div class="match-card-body">
+                            <div class="match-players">
+                                <div class="player">
+                                    <span>Player 1</span>
+                                    <span>John Smith</span>
+                                </div>
+                                <div class="player">
+                                    <span>Player 2</span>
+                                    <span>Mike Johnson</span>
+                                </div>
+                            </div>
+                            <div class="match-details">
+                                <div class="match-date">
+                                    <i class="far fa-calendar"></i>
+                                    <span>Today, 15:30</span>
+                                </div>
+                                <div class="match-court">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Court 2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-actions" style="margin-top: 20px;">
+                        <button class="go-btn" id="go-to-scorecard">
+                            <i class="fas fa-play-circle"></i>
+                            Go to Scorecard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upcoming Matches Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Upcoming Matches</div>
+                        <div class="section-actions">
+                            <div class="search-box">
+                                <!-- <i class="fas fa-search search-icon"></i> -->
+                                <input type="text" placeholder="Search matches..." id="search-matches">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <div class="filter-label">Match Type</div>
+                            <select id="match-type-filter">
+                                <option value="all">All Types</option>
+                                <option value="boys-singles">Boys Singles</option>
+                                <option value="girls-singles">Girls Singles</option>
+                                <option value="boys-doubles">Boys Doubles</option>
+                                <option value="girls-doubles">Girls Doubles</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Match Cards -->
+                    <div class="match-cards" id="matches-container">
+                        <!-- Match cards will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Matches Page -->
+            <div id="completed-matches-page" style="display: none;">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Completed Matches</div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Match ID</th>
+                                    <th>Players</th>
+                                    <th>Winner</th>
+                                    <th>Score</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completed-matches-table">
+                                <!-- Completed matches will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scorecard Page -->
+            <div id="scorecard-page" style="display: none;">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Match Scorecard</div>
+                    </div>
+                    
+                    <div class="match-info">
+                        <div class="info-item">
+                            <span class="info-label">Court</span>
+                            <span class="info-value" id="scorecard-court">2</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Sets</span>
+                            <span class="info-value" id="scorecard-sets">3</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Points</span>
+                            <span class="info-value" id="scorecard-points">21</span>
+                        </div>
+                    </div>
+
+                    <div class="players-container">
+                        <div class="player-card" id="player1-card">
+                            <div class="service-indicator" id="player1-service">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="player-name">John Smith</div>
+                            <div class="player-score" id="player1-score">0</div>
+                            <div class="score-controls">
+                                <button class="btn btn-primary" id="player1-increase">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-secondary" id="player1-decrease">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="player-card" id="player2-card">
+                            <div class="service-indicator" id="player2-service">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="player-name">Mike Johnson</div>
+                            <div class="player-score" id="player2-score">0</div>
+                            <div class="score-controls">
+                                <button class="btn btn-primary" id="player2-increase">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-secondary" id="player2-decrease">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="advantage-message" id="advantage-message" style="display: none;">
+                        Advantage Player 1
+                    </div>
+
+                    <div class="sets-container">
+                        <h3 class="sets-title">Sets History</h3>
+                        <table class="sets-table">
+                            <thead>
+                                <tr>
+                                    <th>Set</th>
+                                    <th>Player 1</th>
+                                    <th>Player 2</th>
+                                    <th>Winner</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sets-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="game-controls">
+                        <button class="btn btn-success" id="new-set-btn" style="display: none;">
+                            Start New Set
+                        </button>
+                        <button class="btn btn-danger" id="reset-match-btn">
+                            End Match
+                        </button>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
+    <!-- Start Match Modal -->
+    <div class="modal-overlay" id="start-match-modal">
+        <div class="modal">
+            <span class="close-modal">&times;</span>
+            <h2 class="modal-title">Start Match</h2>
+            <div class="modal-icon">
+                <i class="fas fa-play-circle"></i>
+            </div>
+            <form id="match-setup-form">
+                <div class="form-group">
+                    <label for="max-points">Max Set Points</label>
+                    <select class="form-control" id="max-points" required>
+                        <option value="11">11 Points</option>
+                        <option value="14">14 Points</option>
+                        <option value="21" selected>21 Points</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="number-of-sets">Number of Sets</label>
+                    <select class="form-control" id="number-of-sets" required>
+                        <option value="1">1 Set</option>
+                        <option value="3" selected>3 Sets</option>
+                        <option value="5">5 Sets</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="court-number">Court Number</label>
+                    <select class="form-control" id="court-number" required>
+                        <option value="1">Court 1</option>
+                        <option value="2">Court 2</option>
+                        <option value="3">Court 3</option>
+                        <option value="4">Court 4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="first-server">First Server</label>
+                    <select class="form-control" id="first-server" required>
+                        <option value="1">Player 1</option>
+                        <option value="2">Player 2</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" id="confirm-start-btn">Start Match</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmation-modal">
+        <div class="modal">
+            <h2 class="modal-title">Confirm Match Start</h2>
+            <div class="confirmation-dialog">
+                <p>Are you sure you want to start this match with the following settings?</p>
+                <div id="confirmation-details">
+                    <!-- Details will be inserted here -->
+                </div>
+                <div class="confirmation-buttons">
+                    <button class="btn btn-cancel" id="cancel-start-btn">Cancel</button>
+                    <button class="btn btn-confirm" id="final-start-btn">Start Match</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dummy data for matches
+        const matches = [
+            {
+                id: 101,
+                type: "boys-singles",
+                player1: "Alex Thompson",
+                player2: "James Wilson",
+                date: "2023-06-15",
+                time: "10:00",
+                court: 1
+            },
+            {
+                id: 102,
+                type: "boys-singles",
+                player1: "John Smith",
+                player2: "Mike Johnson",
+                date: "2023-06-15",
+                time: "15:30",
+                court: 2
+            },
+            {
+                id: 103,
+                type: "girls-singles",
+                player1: "Emma Davis",
+                player2: "Sophia Brown",
+                date: "2023-06-15",
+                time: "11:45",
+                court: 3
+            },
+            {
+                id: 104,
+                type: "boys-doubles",
+                player1: "Team Alpha",
+                player2: "Team Beta",
+                date: "2023-06-16",
+                time: "09:15",
+                court: 1
+            },
+            {
+                id: 105,
+                type: "girls-doubles",
+                player1: "Team Gamma",
+                player2: "Team Delta",
+                date: "2023-06-16",
+                time: "14:00",
+                court: 4
+            },
+            {
+                id: 106,
+                type: "boys-singles",
+                player1: "Robert Miller",
+                player2: "Daniel White",
+                date: "2023-06-16",
+                time: "16:30",
+                court: 2
+            },
+            {
+                id: 107,
+                type: "girls-singles",
+                player1: "Mia Anderson",
+                player2: "Charlotte Martin",
+                date: "2023-06-17",
+                time: "10:30",
+                court: 3
+            },
+            {
+                id: 108,
+                type: "boys-doubles",
+                player1: "Team Eagles",
+                player2: "Team Hawks",
+                date: "2023-06-17",
+                time: "13:45",
+                court: 1
+            }
+        ];
+
+        // Dummy data for completed matches
+        const completedMatches = [
+            {
+                id: 97,
+                type: "boys-singles",
+                player1: "David Lee",
+                player2: "Chris Taylor",
+                winner: "David Lee",
+                score: "21-18, 19-21, 21-16"
+            },
+            {
+                id: 98,
+                type: "girls-singles",
+                player1: "Olivia Martin",
+                player2: "Sophia Clark",
+                winner: "Sophia Clark",
+                score: "21-14, 21-17"
+            },
+            {
+                id: 99,
+                type: "boys-doubles",
+                player1: "Team Red",
+                player2: "Team Blue",
+                winner: "Team Blue",
+                score: "21-19, 17-21, 21-19"
+            },
+            {
+                id: 100,
+                type: "girls-doubles",
+                player1: "Team Green",
+                player2: "Team Yellow",
+                winner: "Team Green",
+                score: "21-12, 21-15"
+            }
+        ];
+
+        // Scorecard state
+        let scorecardState = {
+            maxPoints: 21,
+            numberOfSets: 3,
+            courtNumber: 2,
+            currentSet: 1,
+            player1Score: 0,
+            player2Score: 0,
+            player1Sets: 0,
+            player2Sets: 0,
+            sets: [],
+            servingPlayer: 1, // 1 or 2
+            firstServer: 1, // For alternating service at start of sets
+            matchStarted: false,
+            advantage: null, // null, 1, or 2
+            gameOver: false
+        };
+
+        // Initialize DOM elements
+        const elements = {
+            // Existing elements
+            matchesContainer: document.getElementById('matches-container'),
+            completedMatchesTable: document.getElementById('completed-matches-table'),
+            matchTypeFilter: document.getElementById('match-type-filter'),
+            searchInput: document.getElementById('search-matches'),
+            startMatchModal: document.getElementById('start-match-modal'),
+            confirmationModal: document.getElementById('confirmation-modal'),
+            closeModalButtons: document.querySelectorAll('.close-modal'),
+            confirmStartBtn: document.getElementById('confirm-start-btn'),
+            cancelStartBtn: document.getElementById('cancel-start-btn'),
+            finalStartBtn: document.getElementById('final-start-btn'),
+            menuItems: document.querySelectorAll('.menu-item'),
+            pages: document.querySelectorAll('.content > div'),
+            goToScorecardBtn: document.getElementById('go-to-scorecard'),
+            menuToggle: document.getElementById('menu-toggle'),
+            sidebar: document.getElementById('sidebar'),
+            overlay: document.getElementById('overlay'),
+            mainContent: document.getElementById('main-content'),
+            
+            // Scorecard elements
+            player1Increase: document.getElementById('player1-increase'),
+            player1Decrease: document.getElementById('player1-decrease'),
+            player2Increase: document.getElementById('player2-increase'),
+            player2Decrease: document.getElementById('player2-decrease'),
+            player1Score: document.getElementById('player1-score'),
+            player2Score: document.getElementById('player2-score'),
+            player1Service: document.getElementById('player1-service'),
+            player2Service: document.getElementById('player2-service'),
+            player1Card: document.getElementById('player1-card'),
+            player2Card: document.getElementById('player2-card'),
+            newSetBtn: document.getElementById('new-set-btn'),
+            resetMatchBtn: document.getElementById('reset-match-btn'),
+            scorecardCourt: document.getElementById('scorecard-court'),
+            scorecardSets: document.getElementById('scorecard-sets'),
+            scorecardPoints: document.getElementById('scorecard-points'),
+            advantageMessage: document.getElementById('advantage-message'),
+            setsTableBody: document.getElementById('sets-table-body')
+        };
+
+        // DOM elements for navigation and page control
+        const matchesContainer = document.getElementById('matches-container');
+        const completedMatchesTable = document.getElementById('completed-matches-table');
+        const matchTypeFilter = document.getElementById('match-type-filter');
+        const searchInput = document.getElementById('search-matches');
+        const startMatchModal = document.getElementById('start-match-modal');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        const confirmStartBtn = document.getElementById('confirm-start-btn');
+        const cancelStartBtn = document.getElementById('cancel-start-btn');
+        const finalStartBtn = document.getElementById('final-start-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const pages = document.querySelectorAll('.content > div');
+        const goToScorecardBtn = document.getElementById('go-to-scorecard');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const mainContent = document.getElementById('main-content');
+
+        // Initialize the page
+        function init() {
+            setupEventListeners(); // Set up listeners first
+            renderMatches(); // Then render content
+            renderCompletedMatches();
+        }
+
+        // Render matches based on filters
+        function renderMatches() {
+            const typeValue = elements.matchTypeFilter ? elements.matchTypeFilter.value : 'all';
+            const searchValue = elements.searchInput ? elements.searchInput.value.toLowerCase() : '';
+
+            const filteredMatches = matches.filter(match => {
+                return (typeValue === 'all' || match.type === typeValue) &&
+                       (match.player1.toLowerCase().includes(searchValue) || 
+                        match.player2.toLowerCase().includes(searchValue) ||
+                        match.id.toString().includes(searchValue));
+            });
+
+            if (elements.matchesContainer) {
+                elements.matchesContainer.innerHTML = '';
+            }
+            if (filteredMatches.length === 0) {
+                matchesContainer.innerHTML = '<p>No matches found.</p>';
+                return;
+            }
+
+            filteredMatches.forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+                matchCard.innerHTML = `
+                    <div class="match-card-header">
+                        <div class="match-number">Match #${match.id}</div>
+                        <div class="match-type">${formatMatchType(match.type)}</div>
+                    </div>
+                    <div class="match-card-body">
+                        <div class="match-players">
+                            <div class="player">
+                                <span>${match.type.includes('doubles') ? 'Team 1' : 'Player 1'}</span>
+                                <span>${match.player1}</span>
+                            </div>
+                            <div class="player">
+                                <span>${match.type.includes('doubles') ? 'Team 2' : 'Player 2'}</span>
+                                <span>${match.player2}</span>
+                            </div>
+                        </div>
+                        <div class="match-details">
+                            <div class="match-date">
+                                <i class="far fa-calendar"></i>
+                                <span>${formatDate(match.date)}, ${match.time}</span>
+                            </div>
+                            <div class="match-court">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Court ${match.court}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                matchCard.addEventListener('click', () => {
+                    openStartMatchModal(match);
+                });
+
+                matchesContainer.appendChild(matchCard);
+            });
+        }
+
+        // Render completed matches
+        function renderCompletedMatches() {
+            completedMatchesTable.innerHTML = '';
+            
+            completedMatches.forEach(match => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${match.id}</td>
+                    <td>${match.player1} vs ${match.player2}</td>
+                    <td>${match.winner}</td>
+                    <td>${match.score}</td>
+                    <td>${formatMatchType(match.type)}</td>
+                `;
+                completedMatchesTable.appendChild(row);
+            });
+        }
+
+        // Format match type for display
+        function formatMatchType(type) {
+            return type.split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Open start match modal
+        function openStartMatchModal(match) {
+            // Set court number to match's court
+            document.getElementById('court-number').value = match.court;
+            
+            // Show the modal
+            startMatchModal.classList.add('active');
+            
+            // Store the current match in the confirm button
+            confirmStartBtn.dataset.matchId = match.id;
+        }
+
+        // Start the match with the selected settings
+        function startMatch(settings) {
+            scorecardState.maxPoints = parseInt(settings.maxPoints);
+            scorecardState.numberOfSets = parseInt(settings.numberOfSets);
+            scorecardState.courtNumber = parseInt(settings.courtNumber);
+            scorecardState.firstServer = parseInt(settings.firstServer);
+            scorecardState.servingPlayer = parseInt(settings.firstServer);
+            scorecardState.matchStarted = true;
+            scorecardState.gameOver = false;
+            
+            // Reset scores
+            scorecardState.currentSet = 1;
+            scorecardState.player1Score = 0;
+            scorecardState.player2Score = 0;
+            scorecardState.player1Sets = 0;
+            scorecardState.player2Sets = 0;
+            scorecardState.sets = [];
+            scorecardState.advantage = null;
+            
+            // Update scorecard display
+            elements.scorecardCourt.textContent = scorecardState.courtNumber;
+            elements.scorecardSets.textContent = scorecardState.numberOfSets;
+            elements.scorecardPoints.textContent = scorecardState.maxPoints;
+            elements.player1Score.textContent = '0';
+            elements.player2Score.textContent = '0';
+            
+            // Update service indicator
+            updateServiceIndicator();
+            
+            // Clear sets table
+            elements.setsTableBody.innerHTML = '';
+            
+            // Hide new set button
+            elements.newSetBtn.style.display = 'none';
+            
+            // Show scorecard page
+            showPage('scorecard-page');
+        }
+
+        // Update the service indicator
+        function updateServiceIndicator() {
+            if (scorecardState.servingPlayer === 1) {
+                elements.player1Service.style.display = 'block';
+                elements.player2Service.style.display = 'none';
+                elements.player1Card.classList.add('active');
+                elements.player2Card.classList.remove('active');
+            } else {
+                elements.player1Service.style.display = 'none';
+                elements.player2Service.style.display = 'block';
+                elements.player1Card.classList.remove('active');
+                elements.player2Card.classList.add('active');
+            }
+        }
+
+        // Update the advantage message
+        function updateAdvantageMessage() {
+            if (scorecardState.advantage === 1) {
+                elements.advantageMessage.textContent = 'Advantage John Smith';
+                elements.advantageMessage.style.display = 'block';
+            } else if (scorecardState.advantage === 2) {
+                elements.advantageMessage.textContent = 'Advantage Mike Johnson';
+                elements.advantageMessage.style.display = 'block';
+            } else {
+                elements.advantageMessage.style.display = 'none';
+            }
+        }
+
+        // Check if a set has been won
+        function checkSetWin() {
+            const p1Score = scorecardState.player1Score;
+            const p2Score = scorecardState.player2Score;
+            const maxPoints = scorecardState.maxPoints;
+            
+            // Check for normal win condition
+            if ((p1Score >= maxPoints || p2Score >= maxPoints) && Math.abs(p1Score - p2Score) >= 2) {
+                return p1Score > p2Score ? 1 : 2;
+            }
+            
+            // Check for advantage situation
+            if (p1Score >= maxPoints - 1 && p2Score >= maxPoints - 1) {
+                if (Math.abs(p1Score - p2Score) === 1) {
+                    scorecardState.advantage = p1Score > p2Score ? 1 : 2;
+                    updateAdvantageMessage();
+                } else if (Math.abs(p1Score - p2Score) === 0) {
+                    scorecardState.advantage = null;
+                    updateAdvantageMessage();
+                }
+                
+                // If lead is 2 points after deuce, set is won
+                if (Math.abs(p1Score - p2Score) >= 2) {
+                    return p1Score > p2Score ? 1 : 2;
+                }
+            }
+            
+            return 0;
+        }
+
+        // Award a set to a player
+        function awardSet(winner) {
+            if (winner === 1) {
+                scorecardState.player1Sets++;
+            } else {
+                scorecardState.player2Sets++;
+            }
+            
+            // Record the set result
+            scorecardState.sets.push({
+                set: scorecardState.currentSet,
+                player1: scorecardState.player1Score,
+                player2: scorecardState.player2Score,
+                winner: winner
+            });
+            
+            // Update sets table
+            updateSetsTable();
+            
+            // Check if match is over
+            const setsToWin = Math.ceil(scorecardState.numberOfSets / 2);
+            if (scorecardState.player1Sets >= setsToWin || scorecardState.player2Sets >= setsToWin) {
+                endMatch();
+            } else {
+                // Show new set button
+                newSetBtn.style.display = 'block';
+            }
+        }
+
+        // Update the sets table
+        function updateSetsTable() {
+            elements.setsTableBody.innerHTML = '';
+            
+            scorecardState.sets.forEach(set => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${set.set}</td>
+                    <td>${set.player1}</td>
+                    <td>${set.player2}</td>
+                    <td>${set.winner === 1 ? 'John Smith' : 'Mike Johnson'}</td>
+                `;
+                elements.setsTableBody.appendChild(row);
+            });
+        }
+
+        // Start a new set
+        function startNewSet() {
+            scorecardState.currentSet++;
+            scorecardState.player1Score = 0;
+            scorecardState.player2Score = 0;
+            scorecardState.advantage = null;
+            
+            // Alternate the first server for the new set
+            scorecardState.firstServer = scorecardState.firstServer === 1 ? 2 : 1;
+            scorecardState.servingPlayer = scorecardState.firstServer;
+            
+            // Update display
+            elements.player1Score.textContent = '0';
+            elements.player2Score.textContent = '0';
+            updateServiceIndicator();
+            updateAdvantageMessage();
+            
+            // Hide new set button
+            elements.newSetBtn.style.display = 'none';
+        }
+
+        // End the match
+        function endMatch() {
+            scorecardState.gameOver = true;
+            elements.advantageMessage.textContent = `Match won by ${scorecardState.player1Sets > scorecardState.player2Sets ? 'John Smith' : 'Mike Johnson'}!`;
+            elements.advantageMessage.style.backgroundColor = '#d4edda';
+            elements.advantageMessage.style.display = 'block';
+            
+            // Show the new set button to allow resetting
+            elements.newSetBtn.style.display = 'none';
+        }
+
+        // Reset the match
+        function resetMatch() {
+            if (confirm('Are you sure you want to end this match?')) {
+                scorecardState.matchStarted = false;
+                scorecardState.gameOver = false;
+                
+                // Show dashboard page
+                showPage('dashboard-page');
+            }
+        }
+
+      // Setup event listeners
+function setupEventListeners() {
+    // Filter event listeners
+    if (elements.matchTypeFilter) {
+        elements.matchTypeFilter.addEventListener('change', renderMatches);
+    }
+    if (elements.searchInput) {
+        elements.searchInput.addEventListener('input', renderMatches);
+    }
+
+    // Menu toggle for mobile
+    if (elements.menuToggle) {
+        elements.menuToggle.addEventListener('click', () => {
+            elements.sidebar.classList.toggle('active');
+            elements.mainContent.classList.toggle('sidebar-active');
+            elements.overlay.classList.toggle('active');
+        });
+    }
+
+    // Close sidebar when clicking on overlay
+    if (elements.overlay) {
+        elements.overlay.addEventListener('click', () => {
+            elements.sidebar.classList.remove('active');
+            elements.mainContent.classList.remove('sidebar-active');
+            elements.overlay.classList.remove('active');
+        });
+    }
+
+    // Close modal buttons
+    if (closeModalButtons) {
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                startMatchModal.classList.remove('active');
+                confirmationModal.classList.remove('active');
+            });
+        });
+    }
+
+    // Confirm start match
+    if (confirmStartBtn) {
+        confirmStartBtn.addEventListener('click', () => {
+            const maxPoints = document.getElementById('max-points').value;
+            const numberOfSets = document.getElementById('number-of-sets').value;
+            const courtNumber = document.getElementById('court-number').value;
+            const firstServer = document.getElementById('first-server').value;
+            const matchId = confirmStartBtn.dataset.matchId;
+            
+            // Populate confirmation details
+            const match = matches.find(m => m.id === parseInt(matchId));
+            document.getElementById('confirmation-details').innerHTML = `
+                <p><strong>Match:</strong> #${matchId} - ${formatMatchType(match.type)}</p>
+                <p><strong>Players:</strong> ${match.player1} vs ${match.player2}</p>
+                <p><strong>Max Points:</strong> ${maxPoints}</p>
+                <p><strong>Number of Sets:</strong> ${numberOfSets}</p>
+                <p><strong>Court:</strong> ${courtNumber}</p>
+                <p><strong>First Server:</strong> ${firstServer == 1 ? match.player1 : match.player2}</p>
+            `;
+            
+            // Show confirmation modal
+            startMatchModal.classList.remove('active');
+            confirmationModal.classList.add('active');
+            
+            // Store settings in the final start button
+            finalStartBtn.dataset.settings = JSON.stringify({
+                maxPoints,
+                numberOfSets,
+                courtNumber,
+                firstServer,
+                matchId
+            });
+        });
+    }
+
+    // Cancel start match
+    if (cancelStartBtn) {
+        cancelStartBtn.addEventListener('click', () => {
+            confirmationModal.classList.remove('active');
+            startMatchModal.classList.add('active');
+        });
+    }
+
+    // Final start match confirmation
+    if (finalStartBtn) {
+        finalStartBtn.addEventListener('click', () => {
+            const settings = JSON.parse(finalStartBtn.dataset.settings);
+            
+            // Start the match with these settings
+            startMatch(settings);
+            
+            // Close modal
+            confirmationModal.classList.remove('active');
+        });
+    }
+
+    // Menu item clicks
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (this.id === 'logout-btn') {
+                if (confirm('Are you sure you want to log out?')) {
+                    alert('Logged out successfully!');
+                    // In a real app, this would redirect to login page
+                }
+                return;
+            }
+            
+            const pageId = this.dataset.page;
+            if (pageId) {
+                if (pageId === 'dashboard') {
+                    showPage('dashboard-page');
+                } else if (pageId === 'completed-matches') {
+                    showPage('completed-matches-page');
+                }
+            }
+            
+            // Close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                mainContent.classList.remove('sidebar-active');
+            }
+        });
+    });
+
+    // Go to scorecard button
+    if (goToScorecardBtn) {
+        goToScorecardBtn.addEventListener('click', () => {
+            showPage('scorecard-page');
+        });
+    }
+
+    // Score control buttons - only add if elements exist
+    if (elements.player1Increase) {
+        elements.player1Increase.addEventListener('click', () => {
+            if (!scorecardState.gameOver && scorecardState.matchStarted) {
+                scorecardState.player1Score++;
+                elements.player1Score.textContent = scorecardState.player1Score;
+                
+                // Switch service to the other player when a point is scored
+                scorecardState.servingPlayer = 2;
+                updateServiceIndicator();
+                
+                // Check if set is won
+                const setWinner = checkSetWin();
+                if (setWinner > 0) {
+                    awardSet(setWinner);
+                }
+            }
+        });
+    }
+
+    if (elements.player1Decrease) {
+        elements.player1Decrease.addEventListener('click', () => {
+            if (scorecardState.player1Score > 0 && !scorecardState.gameOver && scorecardState.matchStarted) {
+                scorecardState.player1Score--;
+                elements.player1Score.textContent = scorecardState.player1Score;
+                
+                // Check advantage
+                if (scorecardState.player1Score >= scorecardState.maxPoints - 1 && 
+                    scorecardState.player2Score >= scorecardState.maxPoints - 1) {
+                    if (Math.abs(scorecardState.player1Score - scorecardState.player2Score) === 1) {
+                        scorecardState.advantage = scorecardState.player1Score > scorecardState.player2Score ? 1 : 2;
+                    } else if (scorecardState.player1Score === scorecardState.player2Score) {
+                        scorecardState.advantage = null;
+                    }
+                } else {
+                    scorecardState.advantage = null;
+                }
+                
+                updateAdvantageMessage();
+            }
+        });
+    }
+
+    if (elements.player2Increase) {
+        elements.player2Increase.addEventListener('click', () => {
+            if (!scorecardState.gameOver && scorecardState.matchStarted) {
+                scorecardState.player2Score++;
+                elements.player2Score.textContent = scorecardState.player2Score;
+                
+                // Switch service to the other player when a point is scored
+                scorecardState.servingPlayer = 1;
+                updateServiceIndicator();
+                
+                // Check if set is won
+                const setWinner = checkSetWin();
+                if (setWinner > 0) {
+                    awardSet(setWinner);
+                }
+            }
+        });
+    }
+
+    if (elements.player2Decrease) {
+        elements.player2Decrease.addEventListener('click', () => {
+            if (scorecardState.player2Score > 0 && !scorecardState.gameOver && scorecardState.matchStarted) {
+                scorecardState.player2Score--;
+                elements.player2Score.textContent = scorecardState.player2Score;
+                
+                // Check advantage
+                if (scorecardState.player1Score >= scorecardState.maxPoints - 1 && 
+                    scorecardState.player2Score >= scorecardState.maxPoints - 1) {
+                    if (Math.abs(scorecardState.player1Score - scorecardState.player2Score) === 1) {
+                        scorecardState.advantage = scorecardState.player1Score > scorecardState.player2Score ? 1 : 2;
+                    } else if (scorecardState.player1Score === scorecardState.player2Score) {
+                        scorecardState.advantage = null;
+                    }
+                } else {
+                    scorecardState.advantage = null;
+                }
+                
+                updateAdvantageMessage();
+            }
+        });
+    }
+
+    // New set button
+    if (elements.newSetBtn) {
+        elements.newSetBtn.addEventListener('click', startNewSet);
+    }
+
+    // Reset match button
+    if (elements.resetMatchBtn) {
+        elements.resetMatchBtn.addEventListener('click', resetMatch);
+    }
+}
+
+
+        // Show specific page and hide others
+        function showPage(pageId) {
+            elements.pages.forEach(page => {
+                page.style.display = page.id === pageId ? 'block' : 'none';
+            });
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>

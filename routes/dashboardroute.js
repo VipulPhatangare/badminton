@@ -12,8 +12,9 @@ router.get('/players-info', async(req, res)=>{
         const singlesGirlsMatchesList = await singlesGirlsMatches.find();
         const doublesBoysMatchesList = await doublesBoysMatches.find();
         const doublesGirlsMatchesList = await doublesGirlsMatches.find();
-        // console.log(players);
-        res.json({players, 
+        
+        res.json({
+            players, 
             singlesPlayers, 
             doublesPlayers, 
             singlesBoysMatchesList, 
@@ -24,15 +25,138 @@ router.get('/players-info', async(req, res)=>{
 
     } catch (error) {
         console.log(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
+router.post('/delete-player', async (req, res) => {
+  try {
+    const { email } = req.body;
 
-router.get('/player-section-info', async(req, res)=>{
+    // Find the player first
+    const player = await playerInfo.findOne({ email });
+    if (!player) {
+      return res.status(404).json({ isDelete: false, message: "Player not found" });
+    }
+
+    // Delete the player info
+    await playerInfo.deleteOne({ email });
+
+    // If the player was registered for singles, remove them
+    if (player.singles) {
+      await registerSingles.deleteOne({ email });
+    }
+
+    // If the player was registered for doubles, remove their doubles entry
+    if (player.doubles) {
+      // Check if they are player1
+      const player1 = await registerDoubles.findOne({ email1: email });
+      if (player1) {
+        await registerDoubles.deleteOne({ email1: email });
+
+        // Update the partner's doubles flag to false
+        await playerInfo.findOneAndUpdate(
+          { email: player1.email2 },
+          { $set: { doubles: false } },
+          { new: true }
+        );
+      } else {
+        // Check if they are player2
+        const player2 = await registerDoubles.findOne({ email2: email });
+        if (player2) {
+          await registerDoubles.deleteOne({ email2: email });
+
+          // Update the partner's doubles flag to false
+          await playerInfo.findOneAndUpdate(
+            { email: player2.email1 },
+            { $set: { doubles: false } },
+            { new: true }
+          );
+        }
+      }
+    }
+
+    return res.json({ isDelete: true, message: "Player deleted successfully!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ isDelete: false, message: "Error deleting player!" });
+  }
+});
+
+router.post('/deregister-player', async(req, res)=>{
     try {
+        const {email, category} = req.body;
         
+        // Convert category to lowercase for case-insensitive comparison
+        const categoryLower = category.toLowerCase();
+        
+        // Check if player exists
+        const player = await playerInfo.findOne({ email });
+        if (!player) {
+            return res.status(404).json({ success: false, message: "Player not found" });
+        }
+        
+        if(categoryLower === 'singles'){
+            // Check if player is registered for singles
+            if (!player.singles) {
+                return res.status(400).json({ success: false, message: "Player is not registered for singles" });
+            }
+            
+            await playerInfo.findOneAndUpdate(
+                { email: email },
+                { $set: { singles: false } },
+                { new: true }
+            );
+
+            await registerSingles.deleteOne({email: email});
+            return res.json({success: true, message: 'Successfully removed from singles'});
+        }
+
+        if(categoryLower === 'doubles'){
+            // Check if player is registered for doubles
+            if (!player.doubles) {
+                return res.status(400).json({ success: false, message: "Player is not registered for doubles" });
+            }
+            
+            await playerInfo.findOneAndUpdate(
+                { email: email },
+                { $set: { doubles: false } },
+                { new: true }
+            );
+
+            const player1 = await registerDoubles.findOne({ email1: email });
+            if (player1) {
+                await registerDoubles.deleteOne({ email1: email });
+
+                // Update the partner's doubles flag to false
+                await playerInfo.findOneAndUpdate(
+                    { email: player1.email2 },
+                    { $set: { doubles: false } },
+                    { new: true }
+                );
+            } else {
+                // Check if they are player2
+                const player2 = await registerDoubles.findOne({ email2: email });
+                if (player2) {
+                    await registerDoubles.deleteOne({ email2: email });
+
+                    // Update the partner's doubles flag to false
+                    await playerInfo.findOneAndUpdate(
+                        { email: player2.email1 },
+                        { $set: { doubles: false } },
+                        { new: true }
+                    );
+                }
+            }
+            return res.json({success: true, message: 'Successfully removed from doubles'});
+        }
+        
+        // If category is not singles or doubles
+        return res.status(400).json({ success: false, message: "Invalid category. Must be 'singles' or 'doubles'" });
+
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ success: false, message: 'Error deregistering player' });
     }
 });
 

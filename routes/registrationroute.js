@@ -13,7 +13,6 @@ router.get('/single-register', async (req, res) => {
         }
         const playerInformation = await playerInfo.findOne({email});
         let gender = playerInformation.gender; 
-        let registerType = '';
         
         await playerInfo.findOneAndUpdate(
             { email: email },

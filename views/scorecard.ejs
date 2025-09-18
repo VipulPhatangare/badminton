@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Badminton Scorecard</title>
+
+<style>
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+:root {
+    --primary: #2c3e50;
+    --secondary: #e74c3c;
+    --accent: #3498db;
+    --light: #ecf0f1;
+    --dark: #2c3e50;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --sidebar-width: 250px;
+    --header-height: 70px;
+    --serving-color: #1a5276;
+}
+
+/* --- Extended styles for the scorecard --- */
+html,body {
+    height: 100%;
+    background: linear-gradient(180deg, var(--light), #f7fbff);
+    color: var(--dark);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+/* Header */
+.header {
+    height: var(--header-height);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 12px 18px;
+    background: linear-gradient(90deg, rgba(52,152,219,0.1), rgba(44,62,80,0.03));
+    gap:12px;
+}
+.header h1 {
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+.header .controls {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+/* Match number and set display */
+.match-info-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 18px;
+    background: rgba(44, 62, 80, 0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: 600;
+    color: var(--primary);
+}
+.match-info-header div {
+    padding: 4px 8px;
+}
+
+/* Set start button */
+.set-start-container {
+    text-align: center;
+    padding: 12px;
+    background: rgba(52, 152, 219, 0.08);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.set-start-btn {
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+.set-start-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+.set-start-btn:active {
+    transform: translateY(0);
+}
+
+/* Settings box */
+.settings {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    background: rgba(0,0,0,0.02);
+    padding:8px;
+    border-radius:8px;
+    font-size:0.95rem;
+}
+.settings label { font-size:0.9rem; color:var(--dark); }
+.settings input[type="number"], .settings select {
+    width:80px;
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid #dfe6ee;
+    outline:none;
+    background:white;
+}
+
+/* Main area */
+.main {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 18px;
+}
+
+/* Player card */
+.player {
+    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    min-height: 260px;
+    position:relative;
+    transition: var(--transition);
+}
+
+/* Serving highlight - Enhanced visibility */
+.player.serving {
+    box-shadow: 0 8px 18px rgba(26, 82, 118, 0.2);
+    transform: translateY(-4px);
+    border: 2px solid var(--serving-color);
+    background: linear-gradient(180deg, #f6fbff, #e8f4ff);
+}
+
+/* Player header area */
+.player .meta {
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+}
+.player .name {
+    font-weight:700;
+    font-size:1.05rem;
+    color: var(--primary);
+}
+.player.serving .name {
+    color: var(--serving-color);
+}
+.player .sets-won {
+    font-size:0.95rem;
+    color: var(--accent);
+    font-weight:700;
+}
+
+/* Score display */
+.score {
+    font-size:4.2rem;
+    font-weight:800;
+    letter-spacing: -2px;
+    transition: transform 0.18s ease, color 0.18s ease;
+}
+.score.anim {
+    transform: scale(1.08);
+}
+
+/* Advantage / deuce badge */
+.badge {
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:0.95rem;
+    background: rgba(243,156,18,0.12);
+    color: var(--warning);
+    border: 1px solid rgba(243,156,18,0.14);
+}
+
+/* Buttons area */
+.controls-vertical {
+    display:flex;
+    gap:10px;
+    width:100%;
+    justify-content:center;
+}
+.btn {
+    padding:12px 16px;
+    border-radius:12px;
+    border:none;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: translateY(2px); }
+.btn-lg { padding:14px 20px; font-size:1.1rem; border-radius:14px; }
+
+/* Specific button colors */
+.btn.inc { background: var(--accent); color:white; }
+.btn.dec { background: #e9eef6; color: var(--primary); border:1px solid #e2e9f5; }
+.btn.serviceToggle { background: var(--primary); color:white; }
+.btn.undo { background: #9b59b6; color:white; }
+
+/* Footer / central controls */
+.center {
+    display:flex;
+    gap:12px;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 12px;
+}
+
+/* Match info */
+.match-info {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+.info-pill {
+    background: #f6f9ff;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid #e8f0fb;
+    font-weight:700;
+}
+
+/* Bottom action row */
+.actions {
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+
+/* Set history */
+.set-history {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border-top: 1px solid #eee;
+}
+.set-history h3 {
+    font-size: 0.9rem;
+    color: var(--dark);
+    margin-bottom: 8px;
+    text-align: center;
+}
+.set-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+.set-item {
+    background: #f5f8ff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+/* Set wins display */
+.set-wins-container {
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+.set-wins-title {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+.set-wins {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.set-win-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: #f8faff;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* Responsive styles */
+@media (max-width: 800px) {
+    .main { 
+        grid-template-columns: 1fr; 
+        padding:12px; 
+        gap: 20px;
+    }
+    .score { font-size: 3.2rem; }
+    .header { 
+        padding:10px; 
+        flex-direction: column;
+        height: auto;
+        gap: 15px;
+    }
+    .settings { 
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .settings input[type="number"], .settings select { width:65px; }
+    .player {
+        min-height: 220px;
+    }
+    .match-info {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .info-pill {
+        text-align: center;
+    }
+    .actions {
+        flex-wrap: wrap;
+    }
+    .match-info-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 10px;
+        border-radius: 10px;
+    }
+    .header h1 {
+        font-size: 1rem;
+    }
+    .settings {
+        font-size: 0.85rem;
+    }
+    .btn {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+    .btn-lg {
+        padding: 12px 16px;
+        font-size: 1rem;
+    }
+    .score {
+        font-size: 2.8rem;
+    }
+    .player {
+        padding: 10px;
+        gap: 8px;
+    }
+}
+
+/* Tiny animation for set-won flash */
+.set-won-flash {
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(90deg, rgba(46,204,113,0.06), rgba(52,152,219,0.04));
+    font-weight:900;
+    font-size:2rem;
+    color:var(--success);
+    border-radius:12px;
+    opacity:0;
+    transform: scale(0.96);
+    pointer-events:none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.set-won-flash.show {
+    opacity:1;
+    transform: scale(1);
+}
+
+/* Match winner overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    pointer-events: all;
+}
+.overlay .card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+    padding: 28px;
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+    position: relative;
+    z-index: 1001;
+}
+.overlay.hidden { display:none; }
+.overlay .card h2 { color:var(--primary); margin-bottom:8px; }
+.overlay .card p { margin-bottom:12px; color:#4b5a6a; }
+.overlay .card .close { margin-top:12px; }
+
+/* Set confirmation overlay */
+.set-confirmation {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    pointer-events: all;
+}
+.set-confirmation.hidden {
+    display: none;
+}
+.set-confirmation .card {
+    position: relative;
+    z-index: 1001;
+}
+.set-confirmation .card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+    padding: 28px;
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+}
+.set-confirmation .card h2 {
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.set-confirmation .card p {
+    margin-bottom: 20px;
+    color: #4b5a6a;
+}
+.set-confirmation .card .buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+.set-confirmation .card button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.set-confirmation .card .confirm-btn {
+    background: var(--success);
+    color: white;
+}
+.set-confirmation .card .cancel-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Set completion overlay */
+.set-completion {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    pointer-events: all;
+}
+
+.set-completion.hidden {
+    display: none;
+}
+
+.set-completion .card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+    padding: 28px;
+    position: relative;
+    z-index: 1001;
+}
+
+.match-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8faff;
+    border-radius: 8px;
+}
+
+.summary-container h3 {
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.set-summary-details {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8faff;
+    border-radius: 8px;
+}
+
+.set-summary-details p {
+    margin: 5px 0;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<div class="container" role="application" aria-label="Badminton scorecard">
+    <!-- Header -->
+    <div class="header">
+        <h1>Badminton Scorecard</h1>
+
+        <div class="controls">
+            <div class="settings" aria-hidden="true" style="display:none">
+                <!-- Hidden settings as they come from backend -->
+                <label for="maxPoints">Max points</label>
+                <input id="maxPoints" type="number" min="5" value="15" title="Points to win a set" disabled />
+                <label for="maxSets">Sets to win match</label>
+                <input id="maxSets" type="number" min="1" value="3" title="Number of sets required to win the match" disabled />
+                <label for="initialServer">First Server</label>
+                <select id="initialServer" aria-label="Initial server" disabled>
+                    <option value="0">Player 1</option>
+                    <option value="1">Player 2</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match number and set display -->
+    <div class="match-info-header">
+        <div>Match #: <span id="matchNumber">1</span></div>
+        <div>Current Set: <span id="currentSetDisplay">-</span></div>
+    </div>
+
+    <!-- Set start button -->
+    <div class="set-start-container" id="setStartContainer">
+        <button class="set-start-btn" id="setStartBtn">Start Set <span id="setNumberIndicator">1</span></button>
+    </div>
+
+    <div class="match-info" aria-hidden="false">
+        <div class="info-pill">Max Points: <strong id="displayMaxPoints">15</strong></div>
+        <div class="info-pill">Sets to Win Match: <strong id="displayMaxSets">3</strong></div>
+        <div class="info-pill">First Server: <strong id="initialServerIndicator">Player 1</strong></div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+        <!-- Player 1 -->
+        <div class="player" id="player0" data-index="0" aria-live="polite">
+            <div class="meta" >
+                <div class="name" id="name0" contenteditable="true" aria-label="Player 1 name">Player 1</div>
+                <div class="sets-won">Sets: <span id="sets0">0</span></div>
+            </div>
+
+            <div class="center">
+                <div id="advBadge0" class="badge" style="display:none">ADV</div>
+                <div class="score" id="score0" aria-label="Player 1 score">0</div>
+            </div>
+
+            <div class="controls-vertical">
+                <button class="btn inc btn-lg" data-player="0" data-action="inc" aria-label="Add point to player 1">+1 Point</button>
+            </div>
+
+            <div class="set-won-flash" id="flash0">Set!</div>
+            
+            <!-- <div class="set-history">
+                <h3>Set Wins</h3>
+                <div class="set-list" id="setHistory0"></div>
+            </div> -->
+        </div>
+
+        <!-- Player 2 -->
+        <div class="player" id="player1" data-index="1" aria-live="polite">
+            <div class="meta" >
+                <div class="name" id="name1" contenteditable="true" aria-label="Player 2 name">Player 2</div>
+                <div class="sets-won">Sets: <span id="sets1">0</span></div>
+            </div>
+
+            <div class="center">
+                <div id="advBadge1" class="badge" style="display:none">ADV</div>
+                <div class="score" id="score1" aria-label="Player 2 score">0</div>
+            </div>
+
+            <div class="controls-vertical">
+                <button class="btn inc btn-lg" data-player="1" data-action="inc" aria-label="Add point to player 2">+1 Point</button>
+            </div>
+
+            <div class="set-won-flash" id="flash1">Set!</div>
+            
+            <!-- <div class="set-history">
+                <h3>Set Wins</h3>
+                <div class="set-list" id="z"></div>
+            </div> -->
+        </div>
+    </div>
+
+    <!-- Undo button -->
+    <div class="actions" id="undoContainer" style="display: none;">
+        <button id="undoBtn" class="btn undo">Undo Last Action</button>
+    </div>
+
+    <div class="actions">
+        <button id="toggleServeBtn" class="btn serviceToggle" title="Toggle server manually">Toggle Serve</button>
+        <button id="resetMatchBtn" class="btn dec" title="Full reset">Full Reset</button>
+    </div>
+
+    <!-- Match info -->
+    
+
+    <!-- Set wins display -->
+    <div class="set-wins-container" id="setWinsContainer" style="display: none;">
+        <div class="set-wins-title">Set Results</div>
+        <div class="set-wins" id="setWinsList"></div>
+    </div>
+
+    <!-- Bottom action row -->
+    
+</div>
+
+<!-- Match winner overlay -->
+<div class="overlay hidden" id="overlay" role="dialog" aria-modal="true">
+    <div class="card">
+        <h2 id="winnerTitle">Match Winner</h2>
+        <p id="winnerText"></p>
+        <div id="matchSummary" class="match-summary"></div>
+        <div class="buttons" style="margin-top: 20px;">
+            <button id="overlayClose" class="btn serviceToggle">Close</button>
+            <button id="completeMatchBtn" class="btn inc">Complete Match</button>
+        </div>
+    </div>
+</div>
+
+<!-- Set confirmation overlay -->
+<div class="set-confirmation hidden" id="setConfirmation">
+    <div class="card">
+        <h2>Start Set <span id="confirmSetNumber">1</span>?</h2>
+        <p>Are you sure you want to start Set <span id="confirmSetNumberText">1</span>?</p>
+        <div class="buttons">
+            <button class="cancel-btn" id="setCancelBtn">Cancel</button>
+            <button class="confirm-btn" id="setConfirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Set completion overlay -->
+<div class="set-completion hidden" id="setCompletionOverlay">
+    <div class="card">
+        <h2>Set Complete!</h2>
+        <p id="setCompletionText"></p>
+        <div id="setCompletionSummary" class="set-summary"></div>
+        <div class="buttons">
+            <button class="btn inc" id="startNextSetBtn">Start Next Set</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="/js/scorecard.js"></script>
+</html>

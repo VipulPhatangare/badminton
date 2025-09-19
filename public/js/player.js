@@ -57,11 +57,11 @@ async function initPage() {
         const response = await fetch('/player/info');
         const data = await response.json();
         playerInfo = data;
-        console.log(data);
-        document.getElementById('dbplayer1').value = playerInfo.name;
+        // console.log(data);
+        // document.getElementById('dbplayer1').value = playerInfo.name;
         const response1 = await fetch('/player/allPlayerInfo')
         const data1 = await response1.json();
-        console.log(data1);
+        // console.log(data1);
         players = data1.map((element, index) => ({
             id: index + 1,
             name: element.name,
@@ -72,7 +72,7 @@ async function initPage() {
 
         const response2 = await fetch('/register/check-register')
         playerRegistrationStatus = await response2.json();
-        console.log(playerRegistrationStatus);
+        // console.log(playerRegistrationStatus);
 
         
 

@@ -218,7 +218,7 @@ header {
 .toggle-password {
     position: absolute;
     right: 12px;
-    top: 50%;
+    top: 62px;
     transform: translateY(-50%);
     cursor: pointer;
     color: var(--gray);

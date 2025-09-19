@@ -498,7 +498,7 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
 });
 // Password visibility toggles
 const togglePassword = document.getElementById('togglePassword');
-const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+// const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 const toggleLoginPassword = document.getElementById('toggleLoginPassword');
 
 // Toggle password visibility in signup form
@@ -512,16 +512,16 @@ togglePassword.addEventListener('click', function() {
     this.querySelector('i').classList.toggle('fa-eye-slash');
 });
 
-// Toggle confirm password visibility
-toggleConfirmPassword.addEventListener('click', function() {
-    const confirmInput = document.getElementById('confirmPassword');
-    const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    confirmInput.setAttribute('type', type);
+// // Toggle confirm password visibility
+// toggleConfirmPassword.addEventListener('click', function() {
+//     const confirmInput = document.getElementById('confirmPassword');
+//     const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+//     confirmInput.setAttribute('type', type);
     
-    // Toggle eye icon
-    this.querySelector('i').classList.toggle('fa-eye');
-    this.querySelector('i').classList.toggle('fa-eye-slash');
-});
+//     // Toggle eye icon
+//     this.querySelector('i').classList.toggle('fa-eye');
+//     this.querySelector('i').classList.toggle('fa-eye-slash');
+// });
 
 // Toggle login password visibility
 toggleLoginPassword.addEventListener('click', function() {

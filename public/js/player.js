@@ -58,7 +58,7 @@ async function initPage() {
         const data = await response.json();
         playerInfo = data;
         // console.log(data);
-        // document.getElementById('dbplayer1').value = playerInfo.name;
+        document.getElementById('dbplayer1').value = playerInfo.name;
         const response1 = await fetch('/player/allPlayerInfo')
         const data1 = await response1.json();
         // console.log(data1);

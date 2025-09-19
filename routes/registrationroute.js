@@ -19,8 +19,8 @@ router.get('/single-register', async (req, res) => {
             { $set: { singles: true } },
             { new: true } 
         );
-
-        const player = new registerSingles({ email, gender});
+        let isAllocated = false;
+        const player = new registerSingles({ email, gender, isAllocated});
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
     } catch (error) {
@@ -56,8 +56,8 @@ router.post('/double-register', async (req, res) => {
             { $set: { doubles: true} },
             { new: true } 
         );
-
-        const player = new registerDoubles({ teamName, email1, email2, gender });
+        let isAllocated = false;
+        const player = new registerDoubles({ teamName, email1, email2, gender, isAllocated });
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
     } catch (error) {

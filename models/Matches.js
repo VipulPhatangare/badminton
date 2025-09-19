@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const registerSinglesSchema = new mongoose.Schema({
     email: String,
-    gender: String
+    gender: String,
+    isAllocated: Boolean
 });
 
 
@@ -11,6 +12,7 @@ const registerDoublesSchema = new mongoose.Schema({
     email1: String,
     email2: String,
     gender: String,
+    isAllocated: Boolean
 });
 
 const singlesBoysMatchesSchema = new mongoose.Schema({
@@ -26,7 +28,7 @@ const singlesBoysMatchesSchema = new mongoose.Schema({
     round:String,
     status: String,
     set: Array,
-    date: Date,
+    date: String,
     time: String,
     court: Number,
     winnerEmail: String,
@@ -47,7 +49,7 @@ const singlesGirlsMatchesSchema = new mongoose.Schema({
     round:String,
     status: String,
     set: Array,
-    date: Date,
+    date: String,
     time: String,
     court: Number,
     winnerEmail: String,
@@ -70,7 +72,7 @@ const doublesGirlsMatchesSchema = new mongoose.Schema({
     round:String,
     status: String,
     set: Array,
-    date: Date,
+    date: String,
     time: String,
     court: Number,
     winnerEmail: String,
@@ -93,7 +95,7 @@ const doublesBoysMatchesSchema = new mongoose.Schema({
     round:String,
     status: String,
     set: Array,
-    date: Date,
+    date: String,
     time: String,
     court: Number,
     winnerEmail: String,

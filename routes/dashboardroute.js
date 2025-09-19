@@ -160,4 +160,36 @@ router.post('/deregister-player', async(req, res)=>{
     }
 });
 
+
+
+router.get('/allSinglesInfoMatches', async(req, res)=>{
+  try {
+    const result = await registerSingles.aggregate([
+      {
+        $lookup: {
+          from: "playerinfos", // collection name of playerInfo
+          localField: "email",
+          foreignField: "email",
+          as: "player"
+        }
+      },
+      {
+        $project: {
+          gender: 1,
+          isAllocated: 1,
+          "player.name": 1,
+          "player.email": 1,
+          "player.prn": 1
+        }
+      }
+    ]);
+    
+    res.json(result);
+
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
 module.exports = router;

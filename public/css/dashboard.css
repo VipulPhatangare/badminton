@@ -710,6 +710,154 @@ form {
     width: 100%;
 }
 
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.category-tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #7f8c8d;
+    border-bottom: 3px solid transparent;
+    transition: var(--transition);
+}
+
+.category-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.category-tab:hover {
+    color: var(--accent);
+}
+
+/* Schedule Form */
+.schedule-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.schedule-form h3 {
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.match-players {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.match-players .form-group {
+    flex: 1;
+}
+
+.vs-text {
+    padding: 0 10px 12px 10px;
+    font-weight: bold;
+    color: var(--secondary);
+}
+
+/* Form Row for Date, Time, Court */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.category-tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #7f8c8d;
+    border-bottom: 3px solid transparent;
+    transition: var(--transition);
+}
+
+.category-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.category-tab:hover {
+    color: var(--accent);
+}
+
+/* Schedule Form */
+.schedule-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.schedule-form h3 {
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.match-players {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.match-players .form-group {
+    flex: 1;
+}
+
+.vs-text {
+    padding: 0 10px 12px 10px;
+    font-weight: bold;
+    color: var(--secondary);
+}
+
+/* Form Row for Date, Time, Court */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Scheduled Matches */
+.scheduled-matches h3 {
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Scheduled Matches */
+.scheduled-matches h3 {
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
 .table-container thead th {
     position: sticky;
     top: 0;

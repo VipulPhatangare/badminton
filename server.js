@@ -77,6 +77,8 @@ app.use("/register", registerRoutes);
 const dashboardRoutes = require("./routes/dashboardroute");
 app.use("/dashboard", dashboardRoutes);
 
+const addPlayerRoutes = require("./routes/addPlayer");
+app.use("/addPlayer", addPlayerRoutes);
 
 // Start server
 app.listen(PORT, () => {

@@ -271,33 +271,33 @@ function updateCountdown() {
     const minutes = document.getElementById('minutes');
     const seconds = document.getElementById('seconds');
     
-    // In a real scenario, you would calculate time difference to the event date
-    let sec = parseInt(seconds.textContent);
-    let min = parseInt(minutes.textContent);
-    let hr = parseInt(hours.textContent);
-    let d = parseInt(days.textContent);
+    // Set the competition start date to September 27, 2025
+    const competitionDate = new Date('September 27, 2025 00:00:00');
+    const now = new Date();
     
-    sec--;
-    if (sec < 0) {
-        sec = 59;
-        min--;
-        if (min < 0) {
-            min = 59;
-            hr--;
-            if (hr < 0) {
-                hr = 23;
-                d--;
-                if (d < 0) {
-                    d = 0;
-                }
-            }
-        }
+    // Calculate the time difference
+    const timeDifference = competitionDate - now;
+    
+    // If the competition has already started
+    if (timeDifference <= 0) {
+        days.textContent = '00';
+        hours.textContent = '00';
+        minutes.textContent = '00';
+        seconds.textContent = '00';
+        return;
     }
     
-    days.textContent = d.toString().padStart(2, '0');
-    hours.textContent = hr.toString().padStart(2, '0');
-    minutes.textContent = min.toString().padStart(2, '0');
-    seconds.textContent = sec.toString().padStart(2, '0');
+    // Calculate days, hours, minutes, seconds
+    const daysRemaining = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const hoursRemaining = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutesRemaining = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+    const secondsRemaining = Math.floor((timeDifference % (1000 * 60)) / 1000);
+    
+    // Update the countdown display
+    days.textContent = daysRemaining.toString().padStart(2, '0');
+    hours.textContent = hoursRemaining.toString().padStart(2, '0');
+    minutes.textContent = minutesRemaining.toString().padStart(2, '0');
+    seconds.textContent = secondsRemaining.toString().padStart(2, '0');
 }
 
 function showNotification(message, type = 'info') {

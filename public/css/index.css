@@ -206,6 +206,33 @@ header {
     right: 0;
 }
 
+/* Password Toggle Styles */
+.password-toggle {
+    position: relative;
+}
+
+.password-toggle input {
+    padding-right: 50px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--gray);
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    padding: 5px;
+    transition: var(--transition);
+}
+
+.toggle-password:hover {
+    color: var(--primary-red);
+}
+
 .mobile-nav a {
     display: block;
     color: white;

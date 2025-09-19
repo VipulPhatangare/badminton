@@ -496,5 +496,44 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
         showNotification('Please enter a valid PCCOE email address.', 'error');
     }
 });
+// Password visibility toggles
+const togglePassword = document.getElementById('togglePassword');
+const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+
+// Toggle password visibility in signup form
+togglePassword.addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    // Toggle eye icon
+    this.querySelector('i').classList.toggle('fa-eye');
+    this.querySelector('i').classList.toggle('fa-eye-slash');
+});
+
+// Toggle confirm password visibility
+toggleConfirmPassword.addEventListener('click', function() {
+    const confirmInput = document.getElementById('confirmPassword');
+    const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    confirmInput.setAttribute('type', type);
+    
+    // Toggle eye icon
+    this.querySelector('i').classList.toggle('fa-eye');
+    this.querySelector('i').classList.toggle('fa-eye-slash');
+});
+
+// Toggle login password visibility
+toggleLoginPassword.addEventListener('click', function() {
+    const loginInput = document.getElementById('loginPassword');
+    const type = loginInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    loginInput.setAttribute('type', type);
+    
+    // Toggle eye icon
+    this.querySelector('i').classList.toggle('fa-eye');
+    this.querySelector('i').classList.toggle('fa-eye-slash');
+});
+
+
 
 setInterval(updateCountdown, 1000);

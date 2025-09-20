@@ -30,10 +30,7 @@
                 <i class="fas fa-table-tennis"></i>
                 <span>Matches</span>
             </div>
-            <div class="menu-item" data-section="schedule">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Schedule Generator</span>
-            </div>
+
             <div class="menu-item" data-section="admins">
                 <i class="fas fa-user-shield"></i>
                 <span>Admins</span>
@@ -54,14 +51,11 @@
             </div>
             <h1 class="page-title" id="pageTitle">Dashboard</h1>
             <div class="header-actions">
-                <button class="schedule-btn">
+                <button class="schedule-btn" id="generateSchedule">
                     <i class="fas fa-calendar-plus"></i>
                     Generate Schedule
                 </button>
-                <div class="user-menu">
-                    <div class="user-avatar">A</div>
-                    <span>Admin</span>
-                </div>
+                
             </div>
         </div>
 
@@ -172,6 +166,7 @@
                                 <option value="all">All Branches</option>
                                 <option value="Computer">Computer Engineering</option>
                                 <option value="CSE AIML">CSE AIML</option>
+                                <option value="Computer Regional">Computer Regional</option>
                                 <option value="IT">IT</option>
                                 <option value="Mechanical">Mechanical Engineering</option>
                                 <option value="Civil">Civil Engineering</option>
@@ -458,110 +453,8 @@
                 </div>
             </div>
 
-            <!-- Schedule Generator Section -->
-            <div class="section-content" id="scheduleSection" style="display: none;">
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Schedule Generator</h2>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="categorySelect">Select Category</label>
-                        <select id="categorySelect" class="form-control">
-                            <option value="">Select a category</option>
-                            <option value="boys-singles">Boys Singles</option>
-                            <option value="girls-singles">Girls Singles</option>
-                            <option value="boys-doubles">Boys Doubles</option>
-                            <option value="girls-doubles">Girls Doubles</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="startDate">Tournament Start Date</label>
-                        <input type="date" id="startDate" class="form-control">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="matchesPerDay">Matches per Day</label>
-                            <input type="number" id="matchesPerDay" class="form-control" value="8" min="1" max="20">
-                        </div>
-                        <div class="form-group">
-                            <label for="courtCount">Number of Courts</label>
-                            <input type="number" id="courtCount" class="form-control" value="3" min="1" max="10">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="matchDuration">Match Duration (minutes)</label>
-                        <input type="number" id="matchDuration" class="form-control" value="45" min="15" max="120">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="breakTime">Break Between Matches (minutes)</label>
-                        <input type="number" id="breakTime" class="form-control" value="15" min="5" max="30">
-                    </div>
-
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button class="btn btn-primary" style="padding: 12px 30px;">Generate Schedule</button>
-                    </div>
-
-                    <div class="section" style="margin-top: 30px;">
-                        <div class="section-header">
-                            <h2 class="section-title">Generated Schedule Preview</h2>
-                            <div class="section-actions">
-                                <button class="btn btn-secondary">Export Schedule</button>
-                                <button class="btn btn-primary">Confirm Schedule</button>
-                            </div>
-                        </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Time</th>
-                                        <th>Court</th>
-                                        <th>Match</th>
-                                        <th>Category</th>
-                                        <th>Round</th>
-                                        <th>Players</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Oct 25, 2023</td>
-                                        <td>10:00 AM</td>
-                                        <td>Court 1</td>
-                                        <td>#M105</td>
-                                        <td>Boys Singles</td>
-                                        <td>Quarter Final</td>
-                                        <td>Rajesh Kumar vs Amit Sharma</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Oct 25, 2023</td>
-                                        <td>10:00 AM</td>
-                                        <td>Court 2</td>
-                                        <td>#M106</td>
-                                        <td>Girls Singles</td>
-                                        <td>Round of 16</td>
-                                        <td>Neha Verma vs Priya Patel</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Oct 25, 2023</td>
-                                        <td>11:00 AM</td>
-                                        <td>Court 1</td>
-                                        <td>#M107</td>
-                                        <td>Boys Doubles</td>
-                                        <td>Round of 16</td>
-                                        <td>Team A vs Team B</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+           
+           
             <!-- Admins Section -->
             <div class="section-content" id="adminsSection" style="display: none;">
                 <div class="section">
@@ -684,6 +577,56 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal-overlay" id="generateScheduleModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="close-modal">
+                <i class="fas fa-times"></i>
+            </div>
+            <h2 class="modal-title">Generate Tournament Schedule</h2>
+            <div class="modal-content">
+                <p>Select the tournament category you want to generate a schedule for:</p>
+                
+                <div class="category-cards">
+                    <div class="category-card" data-category="Boys Singles">
+                        <div class="card-icon">
+                            <i class="fas fa-male"></i>
+                        </div>
+                        <h3>Boys Singles</h3>
+                    </div>
+                    
+                    <div class="category-card" data-category="Girls Singles">
+                        <div class="card-icon">
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <h3>Girls Singles</h3>
+                    </div>
+                    
+                    <div class="category-card" data-category="Boys Doubles">
+                        <div class="card-icon">
+                            <i class="fas fa-male"></i>
+                            <i class="fas fa-male"></i>
+                        </div>
+                        <h3>Boys Doubles</h3>
+                    </div>
+                    
+                    <div class="category-card" data-category="Girls Doubles">
+                        <div class="card-icon">
+                            <i class="fas fa-female"></i>
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <h3>Girls Doubles</h3>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-secondary" id="cancelSchedule">Cancel</button>
+                <button class="btn btn-primary" id="nextSchedule" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="/js/dashboard.js"></script>
 </body>
 </html>

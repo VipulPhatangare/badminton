@@ -69,7 +69,6 @@ async function initPage() {
             email: element.email
         }));
 
-
         const response2 = await fetch('/register/check-register')
         playerRegistrationStatus = await response2.json();
         // console.log(playerRegistrationStatus);
@@ -79,7 +78,16 @@ async function initPage() {
 
         pageTitle.innerText = `Welcome, ${data.name}!`;
         profileDetails = document.getElementById('profileDetails');
-
+        let yearVar = "";
+        if(data.year == 'FE'){
+          yearVar = 'First Year';
+        }else if(data.year == 'SE'){
+          yearVar = 'Second Year';
+        }else if(data.year == 'TE'){
+          yearVar = 'Thrid Year';
+        }else{
+          yearVar = 'Final Year';
+        }
         profileDetails.innerHTML = `
                     <div class="detail-item">
                         <div class="detail-label">PRN Number</div>
@@ -92,7 +100,7 @@ async function initPage() {
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Year</div>
-                        <div class="detail-value">${data.year}</div>
+                        <div class="detail-value">${yearVar}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Gender</div>

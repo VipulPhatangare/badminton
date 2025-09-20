@@ -80,6 +80,9 @@ app.use("/dashboard", dashboardRoutes);
 const addPlayerRoutes = require("./routes/addPlayer");
 app.use("/addPlayer", addPlayerRoutes);
 
+const sheduleRoutes = require("./routes/sheduleroute");
+app.use("/shedule", sheduleRoutes);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

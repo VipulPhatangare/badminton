@@ -612,3 +612,54 @@ document.addEventListener('click', function (e) {
         });
     }
 });
+
+
+
+// Generate Schedule functionality
+document.getElementById('generateSchedule').addEventListener('click', function() {
+    document.getElementById('generateScheduleModal').classList.add('active');
+});
+
+document.getElementById('cancelSchedule').addEventListener('click', function() {
+    document.getElementById('generateScheduleModal').classList.remove('active');
+});
+
+// Category selection
+const categoryCards = document.querySelectorAll('.category-card');
+const nextButton = document.getElementById('nextSchedule');
+let selectedCategory = null;
+
+categoryCards.forEach(card => {
+    card.addEventListener('click', function() {
+        // Remove selected class from all cards
+        categoryCards.forEach(c => c.classList.remove('selected'));
+        
+        // Add selected class to clicked card
+        this.classList.add('selected');
+        
+        // Enable next button
+        nextButton.removeAttribute('disabled');
+        
+        // Store selected category
+        selectedCategory = this.getAttribute('data-category');
+    });
+});
+
+// Next button functionality
+nextButton.addEventListener('click', function() {
+    if (selectedCategory) {
+        alert(`Generating schedule for: ${selectedCategory}`);
+        // Here you would typically call a function to generate the schedule
+        // generateTournamentSchedule(selectedCategory);
+        
+        // Close the modal
+        document.getElementById('generateScheduleModal').classList.remove('active');
+    }
+});
+
+// Close modal when clicking outside or on close button
+document.querySelector('#generateScheduleModal .close-modal').addEventListener('click', function() {
+    document.getElementById('generateScheduleModal').classList.remove('active');
+});
+
+

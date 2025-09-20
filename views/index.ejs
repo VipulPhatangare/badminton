@@ -7,6 +7,86 @@
     <link rel="icon" type="image/png" href="\assets\badminton-shuttle-1000x1000-removebg-preview.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/index.css">
+    <style>
+        /* All your existing CSS remains the same */
+        /* I'm adding just the new styles for the date/venue section */
+        
+        /* Date and Venue Section */
+        .date-venue {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
+            text-align: center;
+        }
+        
+        .date-venue-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .date-venue-item {
+            background: white;
+            border-radius: var(--border-radius-lg);
+            padding: 30px;
+            min-width: 280px;
+            box-shadow: var(--shadow-light);
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .date-venue-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--primary-red);
+        }
+        
+        .date-venue-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            transition: var(--transition);
+        }
+        
+        .date-venue-item:hover .date-venue-icon {
+            transform: scale(1.1);
+        }
+        
+        .date-venue-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .date-venue-item h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--primary-red);
+            font-weight: 700;
+        }
+        
+        .date-venue-item p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .date-venue-container {
+                gap: 25px;
+            }
+            
+            .date-venue-item {
+                min-width: 250px;
+                padding: 25px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -50,8 +130,31 @@
         
         <div class="container">
             <h1>Shuttle Showdown 2025</h1>
-            <p>Join the most exciting badminton competition of the year. Show your skills, compete with the best, and win amazing prizes!</p>
+            <p>Join the most exciting badminton competition of the year on September 28-29 at PCCOE Badminton Hall. Show your skills, compete with the best, and win amazing prizes!</p>
             <button class="cta-button register-btn">🏸 Register Now</button>
+        </div>
+    </section>
+
+    <!-- Date and Venue Section -->
+    <section class="date-venue">
+        <div class="container">
+            <h2 class="section-title">Event Details</h2>
+            <div class="date-venue-container">
+                <div class="date-venue-item">
+                    <div class="date-venue-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h3>Dates</h3>
+                    <p>September 28 - 29, 2025</p>
+                </div>
+                <div class="date-venue-item">
+                    <div class="date-venue-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Venue</h3>
+                    <p>Badminton Hall, PCCOE</p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -305,12 +408,18 @@
                     <i class="fas fa-shuttlecock"></i>
                     <span>Shuttle Showdown 2025</span>
                 </div>
-                <!-- <div class="social-links">
-                    <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
-                </div> -->
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/your-profile" target="_blank" title="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/pccoe-s-aimsa/" target="_blank" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://chat.whatsapp.com/DFbskJXCl167h2YeH5ZIPc?mode=ems_share_t" target="_blank" title="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+
                 <div class="footer-contact">
                     <!-- <p>📧 contact@pccoe.edu.in</p> -->
                     <p>Vipul Phanagare: +91 8999741641</p>

@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const { playerInfo } = require("../models/Player");
-const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches} = require("../models/Matches")
+const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter} = require("../models/Matches")
 
 
 
@@ -89,9 +89,26 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //   }
 // }
 
+// async function addMatchCounter() {
+//   try {
+//     const data = {
+//       id: 'vipulPha',
+//       singlesBoysMatchesCount: 0,
+//       singlesGirlsMatchesCount: 0,
+//       doublesBoysMatchesCount: 0,
+//       doublesGirlsMatchesCount: 0
+//   };
+//     const counter = new matchCounter(data);
+//     await counter.save();
+//     return;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
 router.get('/',async(req, res)=>{
   try {
+    // await addMatchCounter();
     res.send('Api Not Woking');
     // await seed();
   } catch (error) {

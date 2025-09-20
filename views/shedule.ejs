@@ -322,6 +322,60 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Add this to your existing CSS */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: bold;
+            box-shadow: var(--shadow-heavy);
+            animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+            max-width: 300px;
+        }
+
+        .toast.success {
+            background-color: var(--success);
+        }
+
+        .toast.error {
+            background-color: var(--danger);
+        }
+
+        .toast.warning {
+            background-color: var(--warning);
+            color: var(--dark-gray);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -334,12 +388,12 @@
         <div class="form-container">
             <div class="player-selection">
                 <div class="player-box">
-                    <label for="player1">Player 1 / Team 1:</label>
+                    <label for="player1" id="player1OrTeam1Name"></label>
                     <select id="player1" onchange="updatePlayer2Options()"></select>
                 </div>
                 <div class="vs-text">VS</div>
                 <div class="player-box">
-                    <label for="player2">Player 2 / Team 2:</label>
+                    <label for="player2" id="player2OrTeam2Name"></label>
                     <select id="player2"></select>
                 </div>
             </div>
@@ -397,7 +451,8 @@
             </div>
         </div>
     </div>
-
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
     <script>
         const typeOfMatch = "<%= typeOfMatch %>";
     </script>

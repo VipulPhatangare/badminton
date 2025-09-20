@@ -197,6 +197,16 @@ async function takePlayerInfo() {
         centralObj.doublesBoysMatchesList = data.doublesBoysMatchesList;
         centralObj.doublesGirlsMatchesList = data.doublesGirlsMatchesList;
 
+        centralObj.allMatches = []
+            .concat(
+                data.singlesBoysMatchesList,
+                data.singlesGirlsMatchesList,
+                data.doublesBoysMatchesList,
+                data.doublesGirlsMatchesList
+            );
+
+        console.log(centralObj.allMatches);
+
         centralObj.totalMatchesCount = 
             data.singlesBoysMatchesList.length + 
             data.singlesGirlsMatchesList.length +
@@ -296,9 +306,8 @@ async function takePlayerInfo() {
                                     <th>Sr. No</th>
                                     <th>Category</th>
                                     <th>Round</th>
-                                    <th>Players</th>
+                                    <th>Players / Teams</th>
                                     <th>Date & Time</th>
-                                    <th>Court</th>
                                     
                                 </tr>
                             </thead>
@@ -306,17 +315,29 @@ async function takePlayerInfo() {
             `;
 
             let count = 1;
+            // console.log(centralObj.totalUpcomingMatches);
             centralObj.totalUpcomingMatches.forEach(element => {
-                tableContent += `
+                if(element.playerName1 && element.playerName2){
+                    tableContent += `
                                 <tr>
                                     <td>${count++}</td>
-                                    <td>${element.type}</td>
+                                    <td>${element.matchType}</td>
                                     <td>${element.round}</td>
                                     <td>${element.playerName1} vs ${element.playerName2}</td>
                                     <td>${element.date}, ${element.time}</td>
-                                    <td>Court ${element.court}</td>
                                     
                                 </tr>`;
+                }else{
+                    tableContent += `
+                                <tr>
+                                    <td>${count++}</td>
+                                    <td>${element.matchType}</td>
+                                    <td>${element.round}</td>
+                                    <td>${element.teamName1} vs ${element.teamName2}</td>
+                                    <td>${element.date}, ${element.time}</td>
+                                    
+                                </tr>`;
+                }
             });
 
             tableContent += `
@@ -369,6 +390,9 @@ function playersSectionInfo() {
                     year = 'Final Year';
                 }
 
+                if(element.playerName1 && element.playerName2){
+                    
+                }
                 trTag.innerHTML = `
                                     <td>${element.name}</td>
                                     <td>${element.phone}</td>
@@ -448,7 +472,7 @@ function filterMatchesByCategory() {
     // Filter matches if a specific category is selected
     const filteredMatches = selectedCategory === 'all' 
         ? centralObj.totalUpcomingMatches 
-        : centralObj.totalUpcomingMatches.filter(match => match.type === selectedCategory);
+        : centralObj.totalUpcomingMatches.filter(match => match.matchType === selectedCategory);
     
     // Populate the table with filtered matches
     let count = 1;
@@ -457,19 +481,77 @@ function filterMatchesByCategory() {
         
         row.innerHTML = `
             <td>${count++}</td>
-            <td>${match.type}</td>
+            <td>${match.matchType}</td>
             <td>${match.round}</td>
             <td>${match.playerName1} vs ${match.playerName2}</td>
             <td>${match.date}, ${match.time}</td>
-            <td>Court ${match.court}</td>
         `;
         
         table.appendChild(row);
     });
 }
 
+
+async function takeMatchInfo() {
+    try {
+        
+        const matchSectionTbody = document.getElementById('matchSectionTbody');
+        centralObj.allMatches.forEach(element => {
+            const trTag = document.createElement('tr');
+            let status = '';
+            let win = '';
+            if(!element.isComplete){
+                status = '<span class="badge badge-warning">Upcoming</span>';
+            }else{
+                status = '<span class="badge badge-success">Completed</span>';
+            }
+            let set = '';
+            if(element.set.length == 0){
+                set = '-';
+            }else{
+                set = 'Have points';
+            }
+            
+            if(element.playerName1 && element.playerName2){
+                trTag.innerHTML = `
+                                    <td>${element.matchNo}</td>
+                                    <td>${element.matchType}</td>
+                                    <td>${element.round}/td>
+                                    <td>${element.playerName1} vs ${element.playerName2}</td>
+                                    <td>${element.date}, ${element.time}</td>
+                                    <td>${status}</td>
+                                    <td>${set}</td>
+                                    <td>
+                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+                                    </td>
+                `;
+            }else{
+                trTag.innerHTML = `
+                                    <td>${element.matchNo}</td>
+                                    <td>${element.matchType}</td>
+                                    <td>${element.round}/td>
+                                    <td>${element.teamName1} vs ${element.teamName2}</td>
+                                    <td>${element.date}, ${element.time}</td>
+                                    <td>${status}</td>
+                                    <td>${set}</td>
+                                    <td>
+                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+                                    </td>
+                `;
+            }
+
+            matchSectionTbody.appendChild(trTag);
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', async()=>{
     await takePlayerInfo();
+    await takeMatchInfo();
     const categoryFilter = document.getElementById('matchCategoryFilter');
     if (categoryFilter) {
         categoryFilter.addEventListener('change', filterMatchesByCategory);
@@ -646,14 +728,39 @@ categoryCards.forEach(card => {
 });
 
 // Next button functionality
-nextButton.addEventListener('click', function() {
-    if (selectedCategory) {
-        alert(`Generating schedule for: ${selectedCategory}`);
-        // Here you would typically call a function to generate the schedule
-        // generateTournamentSchedule(selectedCategory);
-        
-        // Close the modal
-        document.getElementById('generateScheduleModal').classList.remove('active');
+nextButton.addEventListener('click', async function() {
+    try {
+        if (selectedCategory) {
+            let data1 = '';
+            if(selectedCategory == 'Boys Singles'){
+                data1 = 'BS';
+            }else if(selectedCategory == 'Girls Singles'){
+                data1 = 'GS';
+            }else if(selectedCategory == 'Boys Doubles'){
+                data1 = 'BD';
+            }else{
+                data1 = 'GD';
+            }
+
+            const response = await fetch('/dashboard/save-shedule-type', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({data1})
+            });
+
+            const data = await response.json();
+
+            if(data.success){
+                window.location.href = '/shedule';
+            }else{
+                alert('Not save the shedule type.')
+            }
+        }
+    } catch (error) {
+        alert(error);
+        console.log(error);
     }
 });
 

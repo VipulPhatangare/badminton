@@ -1,5 +1,5 @@
 // Initialize variables
-let matchCount = 4;
+let matchCount;
 let isSingles = true;
 let playersData = [];
 let teamsData = [];
@@ -49,6 +49,7 @@ function createDummyData() {
 }
 
 // Update dropdown based on singles/doubles selection
+// Update dropdown based on singles/doubles selection
 function updateDropdownOptions() {
     const player1Select = document.getElementById('player1');
     const player2Select = document.getElementById('player2');
@@ -57,31 +58,89 @@ function updateDropdownOptions() {
     player1Select.innerHTML = '';
     player2Select.innerHTML = '';
     
+    // Add empty option as first choice
+    const emptyOption1 = document.createElement('option');
+    emptyOption1.value = '';
+    emptyOption1.textContent = '-- Select --';
+    player1Select.appendChild(emptyOption1);
+
+    const emptyOption2 = document.createElement('option');
+    emptyOption2.value = '';
+    emptyOption2.textContent = '-- Select Player 1 First --';
+    player2Select.appendChild(emptyOption2);
+    
     if (isSingles) {
-        // Add players to dropdown
+        // Add players to player1 dropdown only (filter out allocated players)
         playersData.forEach(player => {
-            const option1 = document.createElement('option');
-            option1.value = player.id;
-            option1.textContent = `${player.name} (${player.prn})`;
-            player1Select.appendChild(option1);
-            
-            const option2 = document.createElement('option');
-            option2.value = player.id;
-            option2.textContent = `${player.name} (${player.prn})`;
-            player2Select.appendChild(option2);
+            if(!player.isAllocated){
+                const option = document.createElement('option');
+                option.value = player._id;
+                option.textContent = `${player.player[0].name} (${player.player[0].prn})`;
+                player1Select.appendChild(option);
+            }
         });
     } else {
-        // Add teams to dropdown
+        // Add teams to player1 dropdown only (filter out allocated teams)
         teamsData.forEach(team => {
-            const option1 = document.createElement('option');
-            option1.value = team.id;
-            option1.textContent = `${team.name}: ${team.player1.name} & ${team.player2.name}`;
-            player1Select.appendChild(option1);
-            
-            const option2 = document.createElement('option');
-            option2.value = team.id;
-            option2.textContent = `${team.name}: ${team.player1.name} & ${team.player2.name}`;
-            player2Select.appendChild(option2);
+            if(!team.isAllocated){
+                const option = document.createElement('option');
+                option.value = team._id;
+                option.textContent = `${team.teamName}: ${team.player1[0].name} & ${team.player2[0].name}`;
+                player1Select.appendChild(option);
+            }
+        });
+    }
+    
+    // Disable player2 select initially
+    player2Select.disabled = true;
+}
+
+function updatePlayer2Options() {
+    const player1Select = document.getElementById('player1');
+    const player2Select = document.getElementById('player2');
+    const selectedValue = player1Select.value;
+    
+    // Clear player2 dropdown
+    player2Select.innerHTML = '';
+    
+    // If no player1 is selected, disable player2 dropdown
+    if (!selectedValue) {
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = '-- Select Player 1 First --';
+        player2Select.appendChild(emptyOption);
+        player2Select.disabled = true;
+        return;
+    }
+    
+    // Enable player2 dropdown
+    player2Select.disabled = false;
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '-- Select --';
+    player2Select.appendChild(defaultOption);
+    
+    if (isSingles) {
+        // Add all players except the selected one in player1 (filter out allocated players)
+        playersData.forEach(player => {
+            if (!player.isAllocated && player._id !== selectedValue) {
+                const option = document.createElement('option');
+                option.value = player._id;
+                option.textContent = `${player.player[0].name} (${player.player[0].prn})`;
+                player2Select.appendChild(option);
+            }
+        });
+    } else {
+        // Add all teams except the selected one in player1 (filter out allocated teams)
+        teamsData.forEach(team => {
+            if (!team.isAllocated && team._id !== selectedValue) {
+                const option = document.createElement('option');
+                option.value = team._id;
+                option.textContent = `${team.teamName}: ${team.player1[0].name} & ${team.player2[0].name}`;
+                player2Select.appendChild(option);
+            }
         });
     }
     
@@ -90,32 +149,8 @@ function updateDropdownOptions() {
     byeOption.value = 'bye';
     byeOption.textContent = 'BYE';
     player2Select.appendChild(byeOption);
-    
-    // Initialize player2 options
-    updatePlayer2Options();
 }
 
-// Update player2 dropdown based on player1 selection
-function updatePlayer2Options() {
-    const player1Select = document.getElementById('player1');
-    const player2Select = document.getElementById('player2');
-    const selectedValue = player1Select.value;
-    
-    // Enable all options first
-    for (let i = 0; i < player2Select.options.length; i++) {
-        player2Select.options[i].disabled = false;
-    }
-    
-    // Disable the selected player1 option in player2 dropdown
-    if (selectedValue && selectedValue !== 'bye') {
-        for (let i = 0; i < player2Select.options.length; i++) {
-            if (player2Select.options[i].value === selectedValue) {
-                player2Select.options[i].disabled = true;
-                break;
-            }
-        }
-    }
-}
 
 // Show confirmation modal
 function showConfirmation() {
@@ -127,39 +162,53 @@ function showConfirmation() {
     
     // Validate form
     if (!player1Select.value || !player2Select.value) {
-        alert('Please select players/teams for both sides');
+        showToast('Please select players/teams for both sides', 'error');
         return;
     }
     
     // Get selected values
-    const matchType = isSingles ? 'Singles' : 'Doubles';
+    let matchType;
+    if(typeOfMatch == 'BS'){
+        matchType = 'Boys Singles';
+    }else if(typeOfMatch == 'GS'){
+        matchType = 'Girls Singles';
+    }else if(typeOfMatch == 'BD'){
+        matchType = 'Boys Doubles';
+    }else{
+        matchType = 'Girls Doubles';
+    }
     let player1Info, player2Info;
     
     if (isSingles) {
-        const player1 = playersData.find(p => p.id == player1Select.value);
-        player1Info = `${player1.name} (${player1.prn})`;
+        const player1 = playersData.find(p => p._id == player1Select.value);
+        player1Info = `${player1.player[0].name} (${player1.player[0].prn})`;
         
         if (player2Select.value === 'bye') {
             player2Info = 'BYE';
         } else {
-            const player2 = playersData.find(p => p.id == player2Select.value);
-            player2Info = `${player2.name} (${player2.prn})`;
+            const player2 = playersData.find(p => p._id == player2Select.value);
+            player2Info = `${player2.player[0].name} (${player2.player[0].prn})`;
         }
     } else {
-        const team1 = teamsData.find(t => t.id == player1Select.value);
-        player1Info = `${team1.name}: ${team1.player1.name} (${team1.player1.prn}) & ${team1.player2.name} (${team1.player2.prn})`;
+        const team1 = teamsData.find(t => t._id == player1Select.value);
+        player1Info = `${team1.teamName}: ${team1.player1[0].name} (${team1.player1[0].prn}) & ${team1.player2[0].name} (${team1.player2[0].prn})`;
         
         if (player2Select.value === 'bye') {
             player2Info = 'BYE';
         } else {
-            const team2 = teamsData.find(t => t.id == player2Select.value);
-            player2Info = `${team2.name}: ${team2.player1.name} (${team2.player1.prn}) & ${team2.player2.name} (${team2.player2.prn})`;
+            const team2 = teamsData.find(t => t._id == player2Select.value);
+            player2Info = `${team2.teamName}: ${team2.player1[0].name} (${team2.player1[0].prn}) & ${team2.player2[0].name} (${team2.player2[0].prn})`;
         }
     }
     
     const date = dateSelect.value;
     const time = timeSelect.value;
     const round = roundSelect.value;
+
+    let playerOrTeam = 'Player';
+    if(!isSingles){
+        playerOrTeam = 'Team'
+    }
     
     // Populate confirmation details
     const confirmationDetails = document.getElementById('confirmationDetails');
@@ -169,11 +218,11 @@ function showConfirmation() {
             <span>${matchType}</span>
         </div>
         <div class="confirmation-item">
-            <span class="confirmation-label">Player 1/Team 1:</span>
+            <span class="confirmation-label">${playerOrTeam} 1:</span>
             <span>${player1Info}</span>
         </div>
         <div class="confirmation-item">
-            <span class="confirmation-label">Player 2/Team 2:</span>
+            <span class="confirmation-label">${playerOrTeam} 2:</span>
             <span>${player2Info}</span>
         </div>
         <div class="confirmation-item">
@@ -200,106 +249,148 @@ function closeModal() {
 }
 
 // Confirm match and add to allocated matches
-function confirmMatch() {
-    const player1Select = document.getElementById('player1');
-    const player2Select = document.getElementById('player2');
-    const dateSelect = document.getElementById('matchDate');
-    const timeSelect = document.getElementById('matchTime');
-    const roundSelect = document.getElementById('round');
-    
-    // Get selected values
-    const matchType = isSingles ? 'Singles' : 'Doubles';
-    let player1Info, player2Info;
-    
-    if (isSingles) {
-        const player1 = playersData.find(p => p.id == player1Select.value);
-        player1Info = {
-            type: 'player',
-            id: player1.id,
-            name: player1.name,
-            prn: player1.prn
-        };
+async function confirmMatch() {
+    try {
+        const player1Select = document.getElementById('player1');
+        const player2Select = document.getElementById('player2');
+        const dateSelect = document.getElementById('matchDate');
+        const timeSelect = document.getElementById('matchTime');
+        const roundSelect = document.getElementById('round');
         
-        if (player2Select.value === 'bye') {
-            player2Info = {
-                type: 'bye',
-                name: 'BYE'
-            };
-        } else {
-            const player2 = playersData.find(p => p.id == player2Select.value);
-            player2Info = {
-                type: 'player',
-                id: player2.id,
-                name: player2.name,
-                prn: player2.prn
-            };
+        // Get selected values
+        let matchType;
+        if(typeOfMatch == 'BS'){
+            matchType = 'Boys Singles';
+        }else if(typeOfMatch == 'GS'){
+            matchType = 'Girls Singles';
+        }else if(typeOfMatch == 'BD'){
+            matchType = 'Boys Doubles';
+        }else{
+            matchType = 'Girls Doubles';
         }
-    } else {
-        const team1 = teamsData.find(t => t.id == player1Select.value);
-        player1Info = {
-            type: 'team',
-            id: team1.id,
-            name: team1.name,
-            players: [
-                { name: team1.player1.name, prn: team1.player1.prn },
-                { name: team1.player2.name, prn: team1.player2.prn }
-            ]
-        };
+
         
-        if (player2Select.value === 'bye') {
-            player2Info = {
-                type: 'bye',
-                name: 'BYE'
-            };
+
+        const match = {};
+        
+        if (isSingles) {
+            const player1 = playersData.find(p => p._id == player1Select.value);
+            player1.isAllocated = true;
+            match.email1 = player1.player[0].email;
+            match.playerName1 = player1.player[0].name;
+            
+            if (player2Select.value === 'bye') {
+                match.email2 = '';
+                match.playerName2 = 'BYE';
+                match.isBye = true;
+            } else {
+                const player2 = playersData.find(p => p._id == player2Select.value);
+
+                match.email2 = player2.player[0].email;
+                match.playerName2 = player2.player[0].name;
+                match.isBye = false;
+                
+            }
+
+
         } else {
-            const team2 = teamsData.find(t => t.id == player2Select.value);
-            player2Info = {
-                type: 'team',
-                id: team2.id,
-                name: team2.name,
-                players: [
-                    { name: team2.player1.name, prn: team2.player1.prn },
-                    { name: team2.player2.name, prn: team2.player2.prn }
-                ]
-            };
+            const team1 = teamsData.find(t => t._id == player1Select.value);
+            
+            match.teamName1 = team1.teamName;
+            match.teamt1email1 = team1.player1[0].email;
+            match.teamt1email2 = team1.player2[0].email;
+            
+            if (player2Select.value === 'bye') {
+                match.teamName2 = 'Bye';
+                match.teamt2email1 = '';
+                match.teamt2email2 = '';
+                match.isBye = true;
+            } else {
+                const team2 = teamsData.find(t => t._id == player2Select.value);
+                match.teamName2 = team2.teamName;
+                match.teamt2email1 = team2.player1[0].email;
+                match.teamt2email2 = team2.player2[0].email;
+                match.isBye = false;
+                
+            }
+
+
         }
+        
+        const date = dateSelect.value;
+        const time = timeSelect.value;
+        const round = roundSelect.value;
+        let matchNumber = typeOfMatch+  `_${matchCount+1}`;
+
+        match.matchType = matchType;
+        match.date = date;
+        match.time = time;
+        match.matchType = matchType;
+        match.round = round;
+        match.matchNo = matchNumber;
+        match.status = 'Upcomming';
+        match.isComplete = false;
+
+        
+        const response = await fetch("/shedule/allocate-match", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({match, typeOfMatch}),
+        });
+
+        const data = await response.json();
+        if(data.success){
+            showToast(data.message, 'success');
+
+            matchCount++;
+
+            if (isSingles) {
+                // Mark players as allocated
+                const player1 = playersData.find(p => p._id == player1Select.value);
+                player1.isAllocated = true;
+                
+                if (player2Select.value !== 'bye') {
+                    const player2 = playersData.find(p => p._id == player2Select.value);
+                    player2.isAllocated = true;
+                }
+            } else {
+                // Mark teams as allocated
+                const team1 = teamsData.find(t => t._id == player1Select.value);
+                team1.isAllocated = true;
+                
+                if (player2Select.value !== 'bye') {
+                    const team2 = teamsData.find(t => t._id == player2Select.value);
+                    team2.isAllocated = true;
+                }
+            }
+
+            allocatedMatches.push(match);
+        
+            updateMatchNumber();
+            renderAllocatedMatches();
+            
+            // Reset form
+            player1Select.selectedIndex = 0;
+            player2Select.selectedIndex = 0;
+            updatePlayer2Options();
+            
+            // Close modal
+            closeModal();
+            location.reload();
+
+        }else{
+            showToast(data.message, 'error');
+        }
+        
+    } catch (error) {
+        console.log(error);
+        showToast('An error occurred while processing your request', 'error');
     }
-    
-    const date = dateSelect.value;
-    const time = timeSelect.value;
-    const round = roundSelect.value;
-    
-    // Create match object
-    const match = {
-        id: allocatedMatches.length + 1,
-        matchNumber: ++matchCount,
-        type: matchType,
-        player1: player1Info,
-        player2: player2Info,
-        date: date,
-        time: time,
-        round: round
-    };
-    
-    // Add to allocated matches
-    allocatedMatches.push(match);
-    
-    // Update UI
-    updateMatchNumber();
-    renderAllocatedMatches();
-    
-    // Reset form
-    player1Select.selectedIndex = 0;
-    player2Select.selectedIndex = 0;
-    updatePlayer2Options();
-    
-    // Close modal
-    closeModal();
 }
 
 // Update match number display
 function updateMatchNumber() {
-    document.getElementById('matchNumber').textContent = matchCount + 1;
+    document.getElementById('matchNumber').textContent = `${typeOfMatch}_${matchCount + 1}`;
 }
 
 // Render allocated matches
@@ -318,21 +409,21 @@ function renderAllocatedMatches() {
         
         let player1Details, player2Details;
         
-        if (match.type === 'Singles') {
-            player1Details = `${match.player1.name} (${match.player1.prn})`;
-            player2Details = match.player2.type === 'bye' 
+        if (isSingles) {
+            player1Details = `${match.playerName1}`;
+            player2Details = match.isBye
                 ? 'BYE' 
-                : `${match.player2.name} (${match.player2.prn})`;
+                : `${match.playerName2}`;
         } else {
-            player1Details = `${match.player1.name}: ${match.player1.players[0].name} (${match.player1.players[0].prn}) & ${match.player1.players[1].name} (${match.player1.players[1].prn})`;
-            player2Details = match.player2.type === 'bye' 
+            player1Details = `${match.teamName1}`;
+            player2Details = match.isBye
                 ? 'BYE' 
-                : `${match.player2.name}: ${match.player2.players[0].name} (${match.player2.players[0].prn}) & ${match.player2.players[1].name} (${match.player2.players[1].prn})`;
+                : `${match.teamName2})`;
         }
         
         matchCard.innerHTML = `
             <div class="match-card-header">
-                <span class="match-type">${match.type} - Match ${match.matchNumber}</span>
+                <span class="match-type">${match.matchType} - Match ${match.matchNo}</span>
                 <span>${match.round}</span>
             </div>
             <div class="match-players">
@@ -368,7 +459,7 @@ async function init() {
             });
             
             playersData = await response.json();
-            // console.log(playersData);
+            console.log(playersData);
 
         }else{
             isSingles = false;
@@ -378,12 +469,49 @@ async function init() {
                 body: JSON.stringify({gender}),
             });
 
+            
             teamsData = await response.json();
             console.log(teamsData);
         }
 
+        const response1 = await fetch("/shedule/allocated-matches", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({typeOfMatch, gender}),
+        });
+
+        if(isSingles){
+            document.getElementById('player1OrTeam1Name').innerText = 'Player 1:';
+            document.getElementById('player2OrTeam2Name').innerText = 'Player 2:';
+        }else{
+            document.getElementById('player1OrTeam1Name').innerText = 'Team 1:';
+            document.getElementById('player2OrTeam2Name').innerText = 'Team 2:';
+        }
+
+        allocatedMatches = await response1.json();
+
+        const response2 = await fetch('/shedule/match-counter');
+        const data2 = await response2.json();
+        console.log(data2);
+        if(typeOfMatch == 'BS' || typeOfMatch == 'GS'){
+            if(gender == 'Male'){
+                matchCount = data2[0].singlesBoysMatchesCount;
+            }else{
+                matchCount = data2[0].singlesGirlsMatchesCount;
+            }
+        }else{
+            if(gender == 'Male'){
+                matchCount = data2[0].doublesBoysMatchesCount;
+            }else{
+                matchCount = data2[0].doublesGirlsMatchesCount;
+            }
+        }
+        // matchCount = allocatedMatches.length;
+
+
+        updateMatchNumber();
         generateTimeSlots();
-        createDummyData();
+        // createDummyData();
         updateDropdownOptions();
         renderAllocatedMatches();
     } catch (error) {
@@ -392,9 +520,23 @@ async function init() {
 }
 
 
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    toastContainer.appendChild(toast);
+    
+    // Remove toast after animation completes
+    setTimeout(() => {
+        toast.remove();
+    }, 2000);
+}
 
 document.addEventListener("DOMContentLoaded", async function () {
     await init();
+    
+    // Add event listener for player1 changes
+    document.getElementById('player1').addEventListener('change', updatePlayer2Options);
 });
-
-

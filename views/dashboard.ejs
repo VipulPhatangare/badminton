@@ -261,11 +261,7 @@
 
             <!-- Matches Section -->
             <div class="section-content" id="matchesSection" style="display: none;">
-                <div class="view-toggle">
-                    <button class="view-toggle-btn active" data-view="table">Table View</button>
-                    <button class="view-toggle-btn" data-view="bracket">Bracket View</button>
-                </div>
-
+        
                 <div class="section" id="tableView">
                     <div class="section-header">
                         <h2 class="section-title">Match Management</h2>
@@ -279,10 +275,10 @@
                             <div class="filter-label">Category</div>
                             <select>
                                 <option value="all">All Categories</option>
-                                <option value="boys-singles">Boys Singles</option>
-                                <option value="girls-singles">Girls Singles</option>
-                                <option value="boys-doubles">Boys Doubles</option>
-                                <option value="girls-doubles">Girls Doubles</option>
+                                <option value="Boys Singles">Boys Singles</option>
+                                <option value="Girls Singles">Girls Singles</option>
+                                <option value="Boys Doubles">Boys Doubles</option>
+                                <option value="Girls Doubles">Girls Doubles</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -309,14 +305,13 @@
                                     <th>Round</th>
                                     <th>Participants</th>
                                     <th>Date & Time</th>
-                                    <th>Court</th>
                                     <th>Status</th>
                                     <th>Score</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
+                            <tbody id="matchSectionTbody">
+                                <!-- <tr>
                                     <td>#M105</td>
                                     <td>Boys Singles</td>
                                     <td>Quarter Final</td>
@@ -375,82 +370,13 @@
                                         <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
                                         <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
                                     </td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="section" id="bracketView" style="display: none;">
-                    <div class="section-header">
-                        <h2 class="section-title">Boys Singles Bracket</h2>
-                        <div class="section-actions">
-                            <button class="btn btn-secondary">Export Bracket</button>
-                            <button class="btn btn-primary">Print Bracket</button>
-                        </div>
-                    </div>
-
-                    <div class="bracket-container">
-                        <div class="bracket">
-                            <div class="round">
-                                <div class="round-title">Round of 16</div>
-                                <div class="match">
-                                    <div class="participant winner">Rajesh Kumar <span>21</span></div>
-                                    <div class="participant">Amit Sharma <span>15</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant">Suresh Patel <span>18</span></div>
-                                    <div class="participant winner">Rahul Mehta <span>21</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant winner">Vikram Singh <span>21</span></div>
-                                    <div class="participant">Neeraj Kumar <span>17</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant winner">Ajay Deshmukh <span>21</span></div>
-                                    <div class="participant">Sanjay Verma <span>19</span></div>
-                                </div>
-                            </div>
-                            <div class="round">
-                                <div class="round-title">Quarter Finals</div>
-                                <div class="match">
-                                    <div class="participant winner">Rajesh Kumar <span>21</span></div>
-                                    <div class="participant">Rahul Mehta <span>18</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant">Vikram Singh <span>17</span></div>
-                                    <div class="participant winner">Ajay Deshmukh <span>21</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant">Player E <span>-</span></div>
-                                    <div class="participant">Player F <span>-</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant">Player G <span>-</span></div>
-                                    <div class="participant">Player H <span>-</span></div>
-                                </div>
-                            </div>
-                            <div class="round">
-                                <div class="round-title">Semi Finals</div>
-                                <div class="match">
-                                    <div class="participant">Rajesh Kumar <span>-</span></div>
-                                    <div class="participant">Ajay Deshmukh <span>-</span></div>
-                                </div>
-                                <div class="match">
-                                    <div class="participant">TBD <span>-</span></div>
-                                    <div class="participant">TBD <span>-</span></div>
-                                </div>
-                            </div>
-                            <div class="round">
-                                <div class="round-title">Final</div>
-                                <div class="match">
-                                    <div class="participant">TBD <span>-</span></div>
-                                    <div class="participant">TBD <span>-</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+               
             </div>
 
            

@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { playerInfo } = require("../models/Player");
-const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches} = require("../models/Matches")
+const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter} = require("../models/Matches")
 
 router.get('/',(req, res)=>{
-    res.render('shedule',{typeOfMatch: 'GD'});
+    const typeOfMatch = req.session.user.typeOfMatch;
+    // console.log(typeOfMatch);
+    res.render('shedule',{typeOfMatch});
 });
 
 router.post('/player-info', async(req, res)=>{
@@ -86,12 +88,122 @@ router.post('/team-info', async(req, res)=>{
 
 router.post('/allocated-matches',async (req, res)=>{
     try {
-        const {typeOfMatch} = req.body;
-        if(typeOfMatch == 'BS'){
-            
+        const {typeOfMatch, gender} = req.body;
+        if(typeOfMatch == 'BS' || typeOfMatch == 'GS'){
+            if(gender == 'Male'){
+                const result = await singlesBoysMatches.find();
+                return res.json(result); 
+            }else{
+                const result = await singlesGirlsMatches.find();
+                return res.json(result); 
+            }
+        }else{
+            if(gender == 'Male'){
+                const result = await doublesBoysMatches.find();
+                return res.json(result); 
+            }else{
+                const result = await doublesGirlsMatches.find();
+                return res.json(result); 
+            }
         }
     } catch (error) {
         console.log(error);
     }
 });
+
+router.get('/match-counter', async(req, res)=>{
+    try {
+        const matchCounters = await matchCounter.find({id:'vipulPha'});
+        return res.json(matchCounters);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+router.post('/allocate-match', async(req, res)=>{
+    try {
+        const {match, typeOfMatch} = req.body;
+        // console.log(typeOfMatch);
+        if(typeOfMatch == 'BS' || typeOfMatch == 'GS'){
+            if(typeOfMatch == 'BS'){
+                const matches = new singlesBoysMatches(match);
+                await matches.save();
+
+                await matchCounter.findOneAndUpdate(
+                    {id: "vipulPha"},
+                    { $inc: { singlesBoysMatchesCount: 1 } },
+                    {new: true}
+                );
+                // console.log('Boys singles done');
+            }else{
+                const matches = new singlesGirlsMatches(match);
+                await matches.save();
+
+                await matchCounter.findOneAndUpdate(
+                    {id: "vipulPha"},
+                    { $inc: { singlesGirlsMatchesCount: 1 } },
+                    {new: true}
+                );
+                // console.log('Girls singles done');
+            }
+
+            await registerSingles.findOneAndUpdate(
+                { email: match.email1 },
+                { $set: { isAllocated: true} },
+                { new: true } 
+            );
+
+            if(!match.isBye){
+                await registerSingles.findOneAndUpdate(
+                    { email: match.email2 },
+                    { $set: { isAllocated: true} },
+                    { new: true } 
+                );
+            }
+        }else{
+            if(typeOfMatch == 'BD'){
+                const matches = new doublesBoysMatches(match);
+                await matches.save();
+
+                await matchCounter.findOneAndUpdate(
+                    {id: "vipulPha"},
+                    { $inc: { doublesBoysMatchesCount: 1 } },
+                    {new: true}
+                );
+                // console.log('Boys double done');
+            }else{
+                const matches = new doublesGirlsMatches(match);
+                await matches.save();
+
+                await matchCounter.findOneAndUpdate(
+                    {id: "vipulPha"},
+                    { $inc: { doublesGirlsMatchesCount: 1 } },
+                    {new: true}
+                );
+                // console.log('Girls double done');
+            }
+
+            await registerDoubles.findOneAndUpdate(
+                { email1: match.teamt1email1 },
+                { $set: { isAllocated: true} },
+                { new: true } 
+            );
+
+            if(!match.isBye){
+                await registerDoubles.findOneAndUpdate(
+                    { email1: match.teamt2email1 },
+                    { $set: { isAllocated: true} },
+                    { new: true } 
+                );
+            }
+        }
+
+        return res.json({success: true, message: 'Successfully match allocate..'});
+    } catch (error) {
+        console.log(error);
+        return res.json({success: false, message: 'Error in allocating match'});
+    }
+});
+
 module.exports = router;

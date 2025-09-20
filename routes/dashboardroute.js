@@ -192,5 +192,17 @@ router.get('/allSinglesInfoMatches', async(req, res)=>{
 });
 
 
+router.post('/save-shedule-type', (req, res)=>{
+  try {
+    const {data1} = req.body;
+    req.session.user.typeOfMatch = data1;
+    res.json({success: true});
+  } catch (error) {
+    console.log(error);
+    res.json({success: false});
+  }
+});
+
+
 
 module.exports = router;

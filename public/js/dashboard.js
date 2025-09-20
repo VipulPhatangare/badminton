@@ -516,7 +516,7 @@ async function takeMatchInfo() {
                 trTag.innerHTML = `
                                     <td>${element.matchNo}</td>
                                     <td>${element.matchType}</td>
-                                    <td>${element.round}/td>
+                                    <td>${element.round}</td>
                                     <td>${element.playerName1} vs ${element.playerName2}</td>
                                     <td>${element.date}, ${element.time}</td>
                                     <td>${status}</td>
@@ -529,7 +529,7 @@ async function takeMatchInfo() {
                 trTag.innerHTML = `
                                     <td>${element.matchNo}</td>
                                     <td>${element.matchType}</td>
-                                    <td>${element.round}/td>
+                                    <td>${element.round}</td>
                                     <td>${element.teamName1} vs ${element.teamName2}</td>
                                     <td>${element.date}, ${element.time}</td>
                                     <td>${status}</td>

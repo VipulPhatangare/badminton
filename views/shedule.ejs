@@ -327,14 +327,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>Tournament Match Allocation</h1>
+            <h1> Boys Singles Match Allocation</h1>
             <div class="match-number">Match Number: <span id="matchNumber">5</span></div>
         </header>
-
-        <div class="toggle-container">
-            <button class="toggle-btn active" id="singlesBtn">Singles</button>
-            <button class="toggle-btn" id="doublesBtn">Doubles</button>
-        </div>
 
         <div class="form-container">
             <div class="player-selection">
@@ -402,6 +397,10 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const typeOfMatch = "<%= typeOfMatch %>";
+    </script>
 
     <script src="/js/shedule.js"></script>
 </body>

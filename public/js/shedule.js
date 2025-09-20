@@ -117,18 +117,6 @@ function updatePlayer2Options() {
     }
 }
 
-// Toggle between singles and doubles
-function toggleMatchType(type) {
-    isSingles = (type === 'singles');
-    
-    // Update button states
-    document.getElementById('singlesBtn').classList.toggle('active', isSingles);
-    document.getElementById('doublesBtn').classList.toggle('active', !isSingles);
-    
-    // Update dropdown options
-    updateDropdownOptions();
-}
-
 // Show confirmation modal
 function showConfirmation() {
     const player1Select = document.getElementById('player1');
@@ -363,17 +351,50 @@ function renderAllocatedMatches() {
 }
 
 // Initialize the page
-function init() {
-    // Set up event listeners
-    document.getElementById('singlesBtn').addEventListener('click', () => toggleMatchType('singles'));
-    document.getElementById('doublesBtn').addEventListener('click', () => toggleMatchType('doubles'));
-    
-    // Generate data and UI
-    generateTimeSlots();
-    createDummyData();
-    updateDropdownOptions();
-    renderAllocatedMatches();
+async function init() {
+    try {
+
+        let gender = 'Female';
+        if(typeOfMatch == 'BS' || typeOfMatch == 'BD'){
+            gender = 'Male';
+        }
+
+        if(typeOfMatch == 'BS' || typeOfMatch == 'GS'){
+            isSingles = true;
+            const response = await fetch("/shedule/player-info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({gender}),
+            });
+            
+            playersData = await response.json();
+            // console.log(playersData);
+
+        }else{
+            isSingles = false;
+            const response = await fetch("/shedule/team-info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({gender}),
+            });
+
+            teamsData = await response.json();
+            console.log(teamsData);
+        }
+
+        generateTimeSlots();
+        createDummyData();
+        updateDropdownOptions();
+        renderAllocatedMatches();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-// Run initialization when page loads
-window.onload = init;
+
+
+document.addEventListener("DOMContentLoaded", async function () {
+    await init();
+});
+
+

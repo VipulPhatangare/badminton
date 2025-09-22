@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { playerInfo } = require("../models/Player");
+const { playerInfo, refreeInfo } = require("../models/Player");
 const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches} = require("../models/Matches")
 
 router.get('/players-info', async(req, res)=>{
@@ -161,6 +161,85 @@ router.post('/deregister-player', async(req, res)=>{
 });
 
 
+router.post('/delete-match', async (req, res) => {
+  try {
+    const match = req.body;
+    if(match.matchType == 'Boys Singles'){
+      await singlesBoysMatches.deleteOne({email1: match.email1});
+
+      await registerSingles.findOneAndUpdate(
+        {email: match.email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+
+      await registerSingles.findOneAndUpdate(
+        {email: match.email2},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+
+      return res.json({ isDelete: true, message: "Match deleted successfully!" });
+    }
+
+    if(match.matchType == 'Girls Singles'){
+      await singlesGirlsMatches.deleteOne({email1: match.email1});
+
+      await registerSingles.findOneAndUpdate(
+        {email: match.email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+
+      await registerSingles.findOneAndUpdate(
+        {email: match.email2},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+      return res.json({ isDelete: true, message: "Match deleted successfully!" });
+    }
+
+    if(match.matchType == 'Boys Doubles'){
+      await doublesBoysMatches.deleteOne({teamt1email1: match.teamt1email1});
+      await registerDoubles.findOneAndUpdate(
+        {email1: match.teamt1email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+
+      await registerDoubles.findOneAndUpdate(
+        {email1: match.teamt2email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+      return res.json({ isDelete: true, message: "Match deleted successfully!" });
+    }
+
+    if(match.matchType == 'Girls Doubles'){
+      await doublesGirlsMatches.deleteOne({teamt1email1: match.teamt1email1});
+      await registerDoubles.findOneAndUpdate(
+        {email1: match.teamt1email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+
+      await registerDoubles.findOneAndUpdate(
+        {email1: match.teamt2email1},
+        { $set: { isAllocated: false } },
+        { new: true }
+      );
+      return res.json({ isDelete: true, message: "Match deleted successfully!" });
+    }
+
+    
+   
+    return res.json({ isDelete: false, message: "Error deleting match !" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ isDelete: false, message: "Error deleting match !" });
+  }
+});
+
 
 router.get('/allSinglesInfoMatches', async(req, res)=>{
   try {
@@ -195,7 +274,8 @@ router.get('/allSinglesInfoMatches', async(req, res)=>{
 router.post('/save-shedule-type', (req, res)=>{
   try {
     const {data1} = req.body;
-    req.session.user.typeOfMatch = data1;
+    req.session.typeOfMatch = data1;
+    // console.log(req.session.typeOfMatch);
     res.json({success: true});
   } catch (error) {
     console.log(error);
@@ -203,6 +283,33 @@ router.post('/save-shedule-type', (req, res)=>{
   }
 });
 
+router.get('/get-refree-info', async(req, res)=>{
+  try {
+    const refree = await refreeInfo.find();
+    return res.json(refree);
+
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
+router.post('/add-refree', async(req, res)=>{
+  try {
+    const refree = req.body;
+    const isRefree = await refreeInfo.find({refEmail: refree.refEmail});
+    console.log(isRefree);
+    if(isRefree.length != 0){
+      return res.json({success: false, message: 'Refree email alredy register..'});
+    }
+    const ref = new refreeInfo(refree);
+    await ref.save();
+    res.json({success: true, message: 'Referee added successfully!'});
+  } catch (error) {
+    console.log(error);
+    res.json({success: false, message: 'Error occur in adding refree..'});
+  }
+});
 
 
 module.exports = router;

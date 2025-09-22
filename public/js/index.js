@@ -227,6 +227,7 @@ loginForm.addEventListener('submit', async (e) => {
             return;
         }
 
+        
         if (loginEmail && loginEmail.endsWith('@pccoepune.org')){
             const res = await fetch("/auth/login", {
                     method: "POST",
@@ -243,7 +244,7 @@ loginForm.addEventListener('submit', async (e) => {
                     showNotification(data.message, 'success');
                     loginModal.classList.remove('active');
                     if(admin){
-                        document.location.href = '/admin';
+                        document.location.href = '/refree';
                     }else{
                         document.location.href = '/player';
                     }

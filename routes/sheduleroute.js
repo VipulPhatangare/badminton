@@ -4,7 +4,7 @@ const { playerInfo } = require("../models/Player");
 const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter} = require("../models/Matches")
 
 router.get('/',(req, res)=>{
-    const typeOfMatch = req.session.user.typeOfMatch;
+    const typeOfMatch = req.session.typeOfMatch;
     // console.log(typeOfMatch);
     res.render('shedule',{typeOfMatch});
 });

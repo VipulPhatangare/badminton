@@ -14,15 +14,15 @@ function showConfirmationModal(title, message, action) {
 }
 
 // Function to handle player deregistration
-function deregisterPlayer(player, category) {
+async function deregisterPlayer(player, category) {
     const categoryText = category === 'singles' ? 'Singles' : 'Doubles';
     
     showConfirmationModal(
         `Deregister from ${categoryText}`, 
         `Are you sure you want to deregister ${player.name} from ${categoryText}?`,
-        () => {
+        async () => {
             // Send deregister request to server
-            fetch('/dashboard/deregister-player', {
+            await fetch('/dashboard/deregister-player', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -50,13 +50,13 @@ function deregisterPlayer(player, category) {
 }
 
 // Function to handle player deletion
-function deletePlayer(player) {
+async function deletePlayer(player) {
     showConfirmationModal(
         "Delete Player", 
         `Are you sure you want to delete ${player.name}'s profile? This action cannot be undone.`,
-        () => {
+        async () => {
             // Send delete request to server
-            fetch('/dashboard/delete-player', {
+            await fetch('/dashboard/delete-player', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -205,7 +205,7 @@ async function takePlayerInfo() {
                 data.doublesGirlsMatchesList
             );
 
-        console.log(centralObj.allMatches);
+        // console.log(centralObj.allMatches);
 
         centralObj.totalMatchesCount = 
             data.singlesBoysMatchesList.length + 
@@ -492,6 +492,8 @@ function filterMatchesByCategory() {
 }
 
 
+
+
 async function takeMatchInfo() {
     try {
         
@@ -512,35 +514,138 @@ async function takeMatchInfo() {
                 set = 'Have points';
             }
             
-            if(element.playerName1 && element.playerName2){
-                trTag.innerHTML = `
-                                    <td>${element.matchNo}</td>
-                                    <td>${element.matchType}</td>
-                                    <td>${element.round}</td>
-                                    <td>${element.playerName1} vs ${element.playerName2}</td>
-                                    <td>${element.date}, ${element.time}</td>
-                                    <td>${status}</td>
-                                    <td>${set}</td>
-                                    <td>
-                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                                    </td>
-                `;
+            trTag.innerHTML = `
+                <td>${element.matchNo}</td>
+                <td>${element.matchType}</td>
+                <td>${element.round}</td>
+                <td>${element.playerName1 || element.teamName1} vs ${element.playerName2 || element.teamName2}</td>
+                <td>${element.date}, ${element.time}</td>
+                <td>${status}</td>
+                <td>${set}</td>
+                <td>
+                    <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            matchSectionTbody.appendChild(trTag);
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+
+function updateMatchSection(matchesObj) {
+    try {
+        
+        const matchSectionTbody = document.getElementById('matchSectionTbody');
+        matchSectionTbody.innerHTML = '';
+        matchesObj.forEach(element => {
+            const trTag = document.createElement('tr');
+            let status = '';
+    
+            if(!element.isComplete){
+                status = '<span class="badge badge-warning">Upcoming</span>';
             }else{
-                trTag.innerHTML = `
-                                    <td>${element.matchNo}</td>
-                                    <td>${element.matchType}</td>
-                                    <td>${element.round}</td>
-                                    <td>${element.teamName1} vs ${element.teamName2}</td>
-                                    <td>${element.date}, ${element.time}</td>
-                                    <td>${status}</td>
-                                    <td>${set}</td>
-                                    <td>
-                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                                    </td>
-                `;
+                status = '<span class="badge badge-success">Completed</span>';
             }
+            let set = '';
+            if(element.set.length == 0){
+                set = '-';
+            }else{
+                set = 'Have points';
+            }
+            
+            trTag.innerHTML = `
+                <td>${element.matchNo}</td>
+                <td>${element.matchType}</td>
+                <td>${element.round}</td>
+                <td>${element.playerName1 || element.teamName1} vs ${element.playerName2 || element.teamName2}</td>
+                <td>${element.date}, ${element.time}</td>
+                <td>${status}</td>
+                <td>${set}</td>
+                <td>
+                    <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
 
             matchSectionTbody.appendChild(trTag);
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+function filterMatcheSectionByCategory() {
+    const selectedCategory = document.getElementById('matchSectioncategoryFilter').value;
+    const filteredMatches = selectedCategory === 'all' 
+        ? centralObj.allMatches 
+        : centralObj.allMatches.filter(match => match.matchType === selectedCategory);
+    updateMatchSection(filteredMatches);
+}
+
+
+
+
+function filterMatcheSectionByStatus() {
+    const selectedCategory = document.getElementById('matchSectionStatusFilter').value;
+    const filteredMatches = selectedCategory === 'all' 
+        ? centralObj.allMatches 
+        : centralObj.allMatches.filter(match => match.status === selectedCategory);
+    updateMatchSection(filteredMatches);
+}
+
+
+async function handleMatchDelete(match) {
+    // console.log("Match Information to be deleted:", match);
+    
+    showConfirmationModal(
+        "Delete Match", 
+        `Are you sure you want to delete ${match.playerName1 || match.teamName1} vs ${match.playerName2 || match.teamName2} match? This action cannot be undone.`,
+        async () => {
+            await fetch('/dashboard/delete-match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(match)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isDelete) {
+                    alert(data.message);
+                    takePlayerInfo();
+                    updateMatchSection(centralObj.allMatches);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting player');
+            });
+        }
+    );
+}
+
+async function takeRefreeInfo() {
+    try {
+        const response = await fetch('/dashboard/get-refree-info');
+        const data = await response.json();
+        // console.log(data);
+        const tbody = document.getElementById('refereesList');
+        
+        data.forEach(referee => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${referee.name}</td>
+                <td>${referee.refEmail}</td>
+                <td>${referee.phone}</td>
+            `;
+            tbody.appendChild(tr);
         });
 
     } catch (error) {
@@ -552,10 +657,29 @@ async function takeMatchInfo() {
 document.addEventListener('DOMContentLoaded', async()=>{
     await takePlayerInfo();
     await takeMatchInfo();
+    await takeRefreeInfo();
+
     const categoryFilter = document.getElementById('matchCategoryFilter');
     if (categoryFilter) {
         categoryFilter.addEventListener('change', filterMatchesByCategory);
     }
+
+    const matchSectioncategoryFilter = document.getElementById('matchSectioncategoryFilter');
+    if (matchSectioncategoryFilter) {
+        matchSectioncategoryFilter.addEventListener('change', filterMatcheSectionByCategory);
+    }
+
+    const matchSectionStatusFilter = document.getElementById('matchSectionStatusFilter');
+    if (matchSectionStatusFilter) {
+        matchSectionStatusFilter.addEventListener('change', filterMatcheSectionByStatus);
+    }
+
+
+    
+
+
+
+
     playersSectionInfo();
     
     // Confirmation modal actions
@@ -578,13 +702,13 @@ document.addEventListener('DOMContentLoaded', async()=>{
     });
     
     // Add event listeners to action buttons using event delegation
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', async function(e) {
         // Singles deregister button
         if (e.target.closest('.btn-delete-singles')) {
             const email = e.target.closest('.btn-delete-singles').getAttribute('data-email');
             const player = centralObj.players.find(p => p.email === email);
             if (player) {
-                deregisterPlayer(player, 'singles');
+                await deregisterPlayer(player, 'singles');
             }
         }
         
@@ -593,7 +717,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
             const email = e.target.closest('.btn-delete-doubles').getAttribute('data-email');
             const player = centralObj.players.find(p => p.email === email);
             if (player) {
-                deregisterPlayer(player, 'doubles');
+                await deregisterPlayer(player, 'doubles');
             }
         }
         
@@ -602,10 +726,164 @@ document.addEventListener('DOMContentLoaded', async()=>{
             const email = e.target.closest('.btn-delete-profile').getAttribute('data-email');
             const player = centralObj.players.find(p => p.email === email);
             if (player) {
-                deletePlayer(player);
+                await deletePlayer(player);
+            }
+        }
+
+        if (e.target.closest('.btn-delete')) {
+            const row = e.target.closest('tr');
+            const matchIndex = Array.from(row.parentNode.children).indexOf(row);
+            const match = centralObj.allMatches[matchIndex];
+            
+            if (match) {
+                await handleMatchDelete(match);
             }
         }
     });
+
+
+
+
+
+    const addRefereeBtn = document.getElementById('addRefereeBtn');
+    const refereeForm = document.getElementById('refereeForm');
+    const cancelReferee = document.getElementById('cancelReferee');
+    const submitReferee = document.getElementById('submitReferee');
+    const togglePassword = document.getElementById('togglePassword');
+    const refereePassword = document.getElementById('refereePassword');
+    const refereeConfirmationModal = document.getElementById('refereeConfirmationModal');
+    const cancelRefereeCreation = document.getElementById('cancelRefereeCreation');
+    const confirmRefereeCreation = document.getElementById('confirmRefereeCreation');
+    const refereeDetails = document.getElementById('refereeDetails');
+
+            // Toggle referee form visibility
+    addRefereeBtn.addEventListener('click', function() {
+        refereeForm.style.display = refereeForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    cancelReferee.addEventListener('click', function() {
+        refereeForm.style.display = 'none';
+        clearRefereeForm();
+    });
+
+            // Toggle password visibility
+    togglePassword.addEventListener('click', function() {
+        const type = refereePassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        refereePassword.setAttribute('type', type);
+                
+                // Toggle eye icon
+        const eyeIcon = togglePassword.querySelector('i');
+        eyeIcon.classList.toggle('fa-eye');
+        eyeIcon.classList.toggle('fa-eye-slash');
+    });
+
+            // Submit referee form
+    submitReferee.addEventListener('click', function() {
+        const name = document.getElementById('refereeName').value.trim();
+        const refEmail = document.getElementById('refereeEmail').value.trim();
+        const password = refereePassword.value.trim();
+        const phone = document.getElementById('refereePhone').value.trim();
+                
+        if (!name || !refEmail || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+                
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters long');
+            return;
+        }
+
+        if(!refEmail.endsWith('@pccoepune.org')){
+            alert('Please enter a valid PCCOE email address.');
+            return;
+        }
+                
+                // Show confirmation modal with referee details
+        refereeDetails.innerHTML = `
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${refEmail}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Password:</strong> ${'*'.repeat(password.length)}</p>
+        `;
+                
+        refereeConfirmationModal.classList.add('active');
+    });
+
+            // Cancel referee creation
+    cancelRefereeCreation.addEventListener('click', function() {
+        refereeConfirmationModal.classList.remove('active');
+    });
+
+            // Confirm referee creation
+    confirmRefereeCreation.addEventListener('click',async function() {
+        try {
+            const name = document.getElementById('refereeName').value.trim();
+            const refEmail = document.getElementById('refereeEmail').value.trim();
+            const password = refereePassword.value.trim();
+            const phone = `${document.getElementById('refereePhone').value.trim()}`;
+                    // Create referee object
+            const referee = {
+                name,
+                refEmail,
+                phone,
+                password,
+            };
+                    
+                    
+            // console.log('Creating new referee:', referee);
+            const response = await fetch('/dashboard/add-refree', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(referee)
+            });
+
+            const data = await response.json();
+            if(data.success){
+                addRefereeToTable(referee);
+                    
+                    
+                refereeConfirmationModal.classList.remove('active');
+                refereeForm.style.display = 'none';
+                clearRefereeForm();
+                alert(data.message);
+            }else{
+                alert(data.message);
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
+            // Function to add referee to the table
+    function addRefereeToTable(referee) {
+        const tbody = document.getElementById('refereesList');
+        const tr = document.createElement('tr');
+                
+        tr.innerHTML = `
+            <td>${referee.name}</td>
+            <td>${referee.refEmail}</td>
+            <td>${referee.phone}</td>
+        `;
+                
+        tbody.appendChild(tr);
+    }
+
+            // Function to clear the referee form
+    function clearRefereeForm() {
+        document.getElementById('refereeName').value = '';
+        document.getElementById('refereeEmail').value = '';
+        refereePassword.value = '';
+        refereePassword.setAttribute('type', 'password');
+            
+                // Reset eye icon
+        const eyeIcon = togglePassword.querySelector('i');
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }    
 });
 
 const menuToggle = document.getElementById('menuToggle');
@@ -621,7 +899,7 @@ const sectionContents = document.querySelectorAll('.section-content');
 const pageTitle = document.getElementById('pageTitle');
 
 menuItems.forEach(item => {
-    if (item.classList.contains('logout-btn')) return;
+    // if (item.classList.contains('logout-btn')) return;
 
     item.addEventListener('click', function () {
         const section = this.getAttribute('data-section');
@@ -667,24 +945,24 @@ viewToggleBtns.forEach(btn => {
 });
 
 // Logout functionality
-const logoutBtn = document.querySelector('.logout-btn');
-const logoutModal = document.getElementById('logoutModal');
-const cancelLogout = document.getElementById('cancelLogout');
-const confirmLogout = document.getElementById('confirmLogout');
+// const logoutBtn = document.querySelector('.logout-btn');
+// const logoutModal = document.getElementById('logoutModal');
+// const cancelLogout = document.getElementById('cancelLogout');
+// const confirmLogout = document.getElementById('confirmLogout');
 
-logoutBtn.addEventListener('click', function () {
-    logoutModal.classList.add('active');
-});
+// logoutBtn.addEventListener('click', function () {
+//     logoutModal.classList.add('active');
+// });
 
-cancelLogout.addEventListener('click', function () {
-    logoutModal.classList.remove('active');
-});
+// cancelLogout.addEventListener('click', function () {
+//     logoutModal.classList.remove('active');
+// });
 
-confirmLogout.addEventListener('click', function () {
-    // Redirect or perform logout logic here
-    alert('Logging out...');
-    logoutModal.classList.remove('active');
-});
+// confirmLogout.addEventListener('click', function () {
+//     // Redirect or perform logout logic here
+//     alert('Logging out...');
+//     logoutModal.classList.remove('active');
+// });
 
 // Close modal when clicking outside
 document.addEventListener('click', function (e) {
@@ -768,5 +1046,7 @@ nextButton.addEventListener('click', async function() {
 document.querySelector('#generateScheduleModal .close-modal').addEventListener('click', function() {
     document.getElementById('generateScheduleModal').classList.remove('active');
 });
+
+
 
 

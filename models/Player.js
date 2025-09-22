@@ -13,6 +13,16 @@ const playerInfoSchema = new mongoose.Schema({
     singles: Boolean
 });
 
+
+const refreeInfoSchema = new mongoose.Schema({
+    name: String,
+    password: String,
+    refEmail: String,
+    phone: String
+});
+
+const refreeInfo = mongoose.model('refreeInfo', refreeInfoSchema);
+
 const playerInfo = mongoose.model('playerInfo', playerInfoSchema);
 
-module.exports = {playerInfo};
+module.exports = {playerInfo, refreeInfo};

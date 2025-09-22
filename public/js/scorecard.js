@@ -1,6 +1,6 @@
 /**
  * Badminton Scorecard Script
- * - Fixed settings: 15 points, Player 1 serves first, 3 sets to win
+ * - Uses backend data for match configuration
  * - Service logic: rally winner becomes server
  * - Deuce/Advantage logic: at 14-14, need 2-point lead
  * - Set history tracking
@@ -10,31 +10,21 @@
 /* -------------------------
    Config & State
    ------------------------- */
-const state = loadGameState() || {
-    maxPoints: 15,          // Fixed at 15 points
-    maxSetsToWin: 3,        // Fixed at 3 sets to win match
-    currentSet: 0,          // 0 means no set started yet
+const state = {
+    maxPoints: 15,
+    maxSetsToWin: 2,
+    currentSet: 0,
     scores: [0, 0],
     setsWon: [0, 0],
-    setHistory: [[], []],   // Store score for each set won by each player
-    server: 0,              // Player 1 serves first by default
-    initialServer: 0,       // Fixed to Player 1
+    setHistory: [[], []],
+    server: 0,
+    initialServer: 0,
     isMatchActive: false,
-    lastActions: [],        // for undo (stack of {player, action, prevScores, prevState})
-    matchNumber: 1,         // Track match number
-    setResults: [],         // Store set results with set number and scores
+    lastActions: [],
+    matchNumber: 1,
+    setResults: [],
+    matchData: null
 };
-
-// Load game state from session storage
-function loadGameState() {
-    const savedState = sessionStorage.getItem('badmintonGameState');
-    return savedState ? JSON.parse(savedState) : null;
-}
-
-// Save game state to session storage
-function saveGameState() {
-    sessionStorage.setItem('badmintonGameState', JSON.stringify(state));
-}
 
 /* -------------------------
    Cached DOM nodes
@@ -44,7 +34,6 @@ const setsEls = [document.getElementById('sets0'), document.getElementById('sets
 const advEls = [document.getElementById('advBadge0'), document.getElementById('advBadge1')];
 const playerCards = [document.getElementById('player0'), document.getElementById('player1')];
 const flashEls = [document.getElementById('flash0'), document.getElementById('flash1')];
-// const setHistoryEls = [document.getElementById('setHistory0'), document.getElementById('setHistory1')];
 
 const currentSetEl = document.getElementById('currentSetDisplay');
 const displayMaxPointsEl = document.getElementById('displayMaxPoints');
@@ -101,18 +90,6 @@ function updateServerUI(){
         }
     });
 }
-
-// function updateSetHistory() {
-//     for (let i = 0; i < 2; i++) {
-//         setHistoryEls[i].innerHTML = '';
-//         state.setHistory[i].forEach(score => {
-//             const setItem = document.createElement('div');
-//             setItem.className = 'set-item';
-//             setItem.textContent = score;
-//             setHistoryEls[i].appendChild(setItem);
-//         });
-//     }
-// }
 
 function updateSetUI() {
     if (state.currentSet === 0) {
@@ -179,14 +156,12 @@ function startMatch(){
     state.server = state.initialServer;
     state.isMatchActive = true;
     state.lastActions = [];
-    state.matchNumber++;
     state.setResults = [];
     updateAllUI();
 }
 
 // full reset
 function fullReset(){
-    state.matchNumber = 1;
     startMatch();
     hideOverlay();
 }
@@ -233,6 +208,9 @@ function addPointToPlayer(pIndex){
     // Evaluate set-winning
     evaluateSetState();
     updateAllUI();
+    
+    // Update backend with new score
+    updateBackendScore();
 }
 
 /**
@@ -289,7 +267,7 @@ function evaluateSetState(){
  * - Reset scores for next set, increment currentSet
  * - Server: keep as the winner (they were last rally winner)
  */
-function handleSetWin(winnerIndex){
+async function handleSetWin(winnerIndex){
     const loserIndex = 1 - winnerIndex;
     const winnerName = document.getElementById(`name${winnerIndex}`).textContent.trim() || `Player ${winnerIndex + 1}`;
     const score = `${state.scores[winnerIndex]}-${state.scores[loserIndex]}`;
@@ -323,16 +301,18 @@ function handleSetWin(winnerIndex){
         }
     });
 
-    // Save state to session storage
-    saveGameState();
+    // Update backend with set completion
+    await updateBackendSetCompletion(winnerIndex);
 
     // Check match winner
-    // If player has won 2 sets (out of 3), they win the match
-    if(state.setsWon[winnerIndex] >= 2){
+    if(state.setsWon[winnerIndex] >= state.maxSetsToWin){
         // Match ends
         state.isMatchActive = false;
         updateAllUI();
         showMatchWinner(winnerIndex);
+        
+        // Update backend with match completion
+        await updateBackendMatchCompletion(winnerIndex);
         return;
     }
 
@@ -376,6 +356,104 @@ function undoLastAction() {
 }
 
 /* -------------------------
+   Backend API Integration
+   ------------------------- */
+async function fetchMatchInfo() {
+    try {
+        const response = await fetch('/scorecard/get-match-info');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching match info:', error);
+        return null;
+    }
+}
+
+async function updateBackendScore() {
+    try {
+        const response = await fetch('/scorecard/update-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                player1Point: state.scores[0],
+                player2Point: state.scores[1],
+                currentSet: state.currentSet,
+                matchId : state.matchData._id,
+                matchType : state.matchData.matchType,
+                server: state.server === 0 ? state.matchData.playerName1 : state.matchData.playerName2
+            })
+        });
+
+        console.log(state.setsWon);
+        
+        if (!response.ok) {
+            console.error('Failed to update score on backend');
+        }
+    } catch (error) {
+        console.error('Error updating score:', error);
+    }
+}
+
+async function updateBackendSetCompletion(winnerIndex) {
+    try {
+        const response = await fetch('/scorecard/complete-set', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                setNumber: state.currentSet,
+                winnerIndex: winnerIndex,
+                player1Point: state.scores[0],
+                player2Point: state.scores[1],
+                matchId : state.matchData._id,
+                matchType : state.matchData.matchType,
+                server: state.server === 0 ? state.matchData.playerName1 : state.matchData.playerName2
+            })
+        });
+
+    
+
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Failed to update set completion on backend');
+        }
+    } catch (error) {
+        console.error('Error updating set completion:', error);
+    }
+}
+
+async function updateBackendMatchCompletion(winnerIndex) {
+    try {
+        const response = await fetch('/scorecard/complete-match', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                winnerIndex: winnerIndex,
+                setsWon: state.setsWon,
+                matchId : state.matchData._id,
+                matchType : state.matchData.matchType
+            })
+        });
+        
+        const data = await response.json();
+        if (!data.success) {
+            console.error('Failed to update match completion on backend');
+        }
+        
+        // window.location.href = '/refree';
+
+    } catch (error) {
+        console.error('Error updating match completion:', error);
+    }
+}
+
+/* -------------------------
    UI Update logic
    ------------------------- */
 function updateAllUI(){
@@ -390,13 +468,12 @@ function updateAllUI(){
     });
 
     // match number
-    matchNumberEl.textContent = state.matchNumber;
+    matchNumberEl.textContent = state.matchData ? state.matchData.matchNo : '1';
     
     displayMaxPointsEl.textContent = state.maxPoints;
-    displayMaxSetsEl.textContent = state.maxSetsToWin;
+    displayMaxSetsEl.textContent = state.matchData.maxSets;
     initialServerIndicatorEl.textContent = document.getElementById('name0').textContent.trim() || 'Player 1';
     updateServerUI();
-    // updateSetHistory();
     updateSetUI();
     updateSetWinsDisplay();
 
@@ -425,7 +502,6 @@ function showMatchWinner(winnerIdx){
     document.getElementById('matchSummary').innerHTML = summaryHTML;
     
     overlay.classList.remove('hidden');
-    saveGameState();
 }
 
 function hideOverlay(){
@@ -466,7 +542,6 @@ function showSetCompletionPopup(winnerIndex) {
     document.getElementById('setCompletionSummary').innerHTML = summaryHTML;
     
     setCompletionOverlay.classList.remove('hidden');
-    saveGameState();
 }
 
 function showSetConfirmation() {
@@ -512,6 +587,7 @@ setCancelBtn.addEventListener('click', () => {
 toggleServeBtn.addEventListener('click', ()=>{
     state.server = 1 - state.server;
     updateAllUI();
+    updateBackendScore();
 });
 
 // full reset
@@ -523,7 +599,7 @@ resetMatchBtn.addEventListener('click', ()=>{
 undoBtn.addEventListener('click', undoLastAction);
 
 // overlay close
-overlayClose.addEventListener('click', hideOverlay);
+// overlayClose.addEventListener('click', hideOverlay);
 
 // allow names to be edited and reflected
 document.getElementById('name0').addEventListener('input', updateAllUI);
@@ -531,10 +607,7 @@ document.getElementById('name1').addEventListener('input', updateAllUI);
 
 // Add event listener for complete match button
 document.getElementById('completeMatchBtn').addEventListener('click', () => {
-    if(confirm('Are you sure you want to complete this match? This will clear the match data.')) {
-        sessionStorage.removeItem('badmintonGameState');
-        fullReset();
-    }
+    window.location.href = '/refree';
 });
 
 // Add event listener for start next set button
@@ -544,18 +617,64 @@ document.getElementById('startNextSetBtn').addEventListener('click', () => {
     state.scores = [0,0];
     state.isMatchActive = true;
     updateAllUI();
-    saveGameState();
 });
 
-// When making any changes to the game state, save it
-document.addEventListener('click', (e) => {
-    const target = e.target;
-    if(target.matches('[data-action="inc"]') || 
-       target.id === 'toggleServeBtn' || 
-       target.id === 'undoBtn') {
-        setTimeout(saveGameState, 0);
+/* -------------------------
+   Initialize the application
+   ------------------------- */
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch match data from backend
+    const matchData = await fetchMatchInfo();
+    
+    if (matchData) {
+        state.matchData = matchData;
+        state.maxPoints = matchData.maxSetPoint || 15;
+        state.maxSetsToWin = Math.floor(matchData.maxSets / 2 + 1) || 2;
+        
+        // Set player names
+        document.getElementById('name0').textContent = matchData.playerName1 || matchData.teamName1;
+        document.getElementById('name1').textContent = matchData.playerName2 || matchData.teamName2;
+        
+        console.log(matchData);
+        // Set initial server based on backend data
+        if (matchData.set && matchData.set.length > 0) {
+            const currentSet = matchData.set[matchData.set.length - 1];
+            if(matchData.playerName1){
+                state.initialServer = currentSet.serve === matchData.playerName1 ? 0 : 1;
+            }else{
+                state.initialServer = currentSet.serve === matchData.teamName1 ? 0 : 1;
+            }
+            
+            state.server = state.initialServer;
+            
+            // If set is already in progress, load the scores
+            if (!currentSet.isSetComplete) {
+                state.currentSet = matchData.set.length;
+                state.scores = [currentSet.player1Point, currentSet.player2Point];
+                state.isMatchActive = true;
+                
+                // Load completed sets
+                for (let i = 0; i < matchData.set.length - 1; i++) {
+                    const set = matchData.set[i];
+                    if (set.isSetComplete) {
+                        const winnerIndex = set.player1Point > set.player2Point ? 0 : 1;
+                        const winnerName = winnerIndex === 0 ? matchData.playerName1 : matchData.playerName2;
+                        const score = `${set.player1Point}-${set.player2Point}`;
+                        
+                        state.setResults.push({
+                            setNumber: i + 1,
+                            winnerIndex: winnerIndex,
+                            winnerName: winnerName,
+                            score: score
+                        });
+                        
+                        state.setsWon[winnerIndex]++;
+                        state.setHistory[winnerIndex].push(score);
+                    }
+                }
+            }
+        }
     }
+    
+    updateAllUI();
 });
-
-// Initialize the UI and load saved state
-updateAllUI();

@@ -39,20 +39,15 @@ app.use(express.json());
 // Routes
 app.get("/", (req, res) => {
   if (req.session.user) {
-    console.log(req.session.user);
+    // console.log(req.session.user);
     res.redirect("/player");
-  } else {
+  } else if(req.session.refree){
+    res.redirect('/refree')
+  }else{
     res.render("index");
   }
 });
 
-app.get('/refree',(req, res)=>{
-  res.render('refree');
-});
-
-app.get('/scorecard',(req, res)=>{
-  res.render('scorecard');
-});
 
 app.get("/player", (req, res) => {
   res.render("player");
@@ -83,6 +78,12 @@ app.use("/addPlayer", addPlayerRoutes);
 const sheduleRoutes = require("./routes/sheduleroute");
 app.use("/shedule", sheduleRoutes);
 
+const refreeRoutes = require("./routes/refreeroute");
+app.use("/refree", refreeRoutes);
+
+
+const scorecardRoutes = require("./routes/scorecardroute");
+app.use("/scorecard", scorecardRoutes);
 
 // Start server
 app.listen(PORT, () => {

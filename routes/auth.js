@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const sendOtpEmail = require("../utils/otp");
 const sendPassEmail = require("../utils/mail");
-const { playerInfo } = require("../models/Player");
+const { playerInfo, refreeInfo } = require("../models/Player");
 
 // Generate random OTP
 function generateOtp() {
@@ -13,27 +13,57 @@ router.post("/login", async (req, res) => {
   try {
     const { loginEmail, loginPassword, admin } = req.body;
 
-    const existingPlayer = await playerInfo.findOne({ email: loginEmail });
-    if (!existingPlayer) {
-      return res.status(400).json({ isLogin: false, message: "Invalid email.." });
-    }
+    // Regenerate session (clear old data safely)
+    req.session.regenerate(async (err) => {
+      if (err) {
+        console.error("Session regenerate error:", err);
+        return res.status(500).json({ isLogin: false, message: "Session error" });
+      }
 
-    if (existingPlayer.password !== loginPassword) {
-      return res.status(400).json({ isLogin: false, message: "Invalid password.." });
-    }
+      if (admin) {
+        const existingRefree = await refreeInfo.findOne({ refEmail: loginEmail });
+        if (!existingRefree) {
+          return res.status(400).json({ isLogin: false, message: "Invalid email.." });
+        }
 
-    req.session.user = {
-      isLogin: true,
-      email: loginEmail,
-      admin: admin
-    };
+        if (existingRefree.password !== loginPassword) {
+          return res.status(400).json({ isLogin: false, message: "Invalid password.." });
+        }
 
-    return res.status(200).json({ isLogin: true, message: "Login successfully.." });
+        req.session.refree = {
+          isLogin: true,
+          refEmail: loginEmail,
+          refName: existingRefree.name,
+          isScorecard: false,
+          matchId:'',
+          matchType: '',
+        };
+
+        return res.status(200).json({ isLogin: true, message: "Login successfully.." });
+      } else {
+        const existingPlayer = await playerInfo.findOne({ email: loginEmail });
+        if (!existingPlayer) {
+          return res.status(400).json({ isLogin: false, message: "Invalid email.." });
+        }
+
+        if (existingPlayer.password !== loginPassword) {
+          return res.status(400).json({ isLogin: false, message: "Invalid password.." });
+        }
+
+        req.session.user = {
+          isLogin: true,
+          email: loginEmail,
+        };
+
+        return res.status(200).json({ isLogin: true, message: "Login successfully.." });
+      }
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ isLogin: false, message: "Server error.." });
   }
 });
+
 
 // OTP route
 router.post("/send-otp", async (req, res) => {

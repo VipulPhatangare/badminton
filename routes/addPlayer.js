@@ -84,6 +84,7 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //     console.log("👯 Doubles registered:", doubles.length);
 
 //     console.log("✅ Dummy data inserted successfully!");
+//     return;
 //   } catch (err) {
 //     console.error("❌ Error:", err);
 //   }
@@ -106,15 +107,16 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //   }
 // }
 
-router.get('/',async(req, res)=>{
-  try {
-    // await addMatchCounter();
-    res.send('Api Not Woking');
-    // await seed();
-  } catch (error) {
-    console.log(error);
-  }
-});
+// router.get('/',async(req, res)=>{
+//   try {
+//     await addMatchCounter();
+//     // await seed();
+//     res.send('Api Not Woking');
+    
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 
 module.exports = router;

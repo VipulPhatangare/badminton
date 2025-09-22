@@ -23,6 +23,7 @@ const singlesBoysMatchesSchema = new mongoose.Schema({
     email2:String,
     matchNo: String,
     refreeName: String,
+    refEmail: String,
     maxSetPoint: Number,
     maxSets : Number,
     round:String,
@@ -33,7 +34,7 @@ const singlesBoysMatchesSchema = new mongoose.Schema({
     court: Number,
     winnerEmail: String,
     isComplete: Boolean,
-    matchType: String
+    matchType: String,
 });
 
 const singlesGirlsMatchesSchema = new mongoose.Schema({
@@ -44,6 +45,7 @@ const singlesGirlsMatchesSchema = new mongoose.Schema({
     playerName2: String,
     matchNo: String,
     refreeName: String,
+    refEmail: String,
     maxSetPoint: Number,
     maxSets : Number,
     round:String,
@@ -67,6 +69,7 @@ const doublesGirlsMatchesSchema = new mongoose.Schema({
     teamt2email2: String,
     matchNo: String,
     refreeName: String,
+    refEmail: String,
     maxSetPoint: Number,
     maxSets : Number,
     round:String,
@@ -90,6 +93,7 @@ const doublesBoysMatchesSchema = new mongoose.Schema({
     teamt2email2: String,
     matchNo: String,
     refreeName: String,
+    refEmail: String,
     maxSetPoint: Number,
     maxSets : Number,
     round:String,

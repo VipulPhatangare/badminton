@@ -418,7 +418,7 @@ function renderAllocatedMatches() {
             player1Details = `${match.teamName1}`;
             player2Details = match.isBye
                 ? 'BYE' 
-                : `${match.teamName2})`;
+                : `${match.teamName2}`;
         }
         
         matchCard.innerHTML = `

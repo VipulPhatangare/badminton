@@ -508,10 +508,15 @@ async function takeMatchInfo() {
                 status = '<span class="badge badge-success">Completed</span>';
             }
             let set = '';
-            if(element.set.length == 0){
+            if(element.isBye){
+                set = 'Bye';
+            }else if(element.set.length == 0){
                 set = '-';
-            }else{
-                set = 'Have points';
+            }else {
+                for(let i = 0; i < element.set.length-1; i++){
+                    set +=`${element.set[i].player1Point}-${element.set[i].player2Point}, `; 
+                }
+                set = set.replace(/,\s*$/, ""); 
             }
             
             trTag.innerHTML = `
@@ -1049,4 +1054,102 @@ document.querySelector('#generateScheduleModal .close-modal').addEventListener('
 
 
 
+// Add CSS classes for animations
+const style = document.createElement('style');
+style.textContent = `
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+    
+    .fade-in-left {
+        animation: fadeInLeft 0.5s ease-out forwards;
+        opacity: 0;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(style);
 
+// Update menu toggle to add animation
+menuToggle.addEventListener('click', function () {
+    sidebar.classList.toggle('active');
+    if (sidebar.classList.contains('active')) {
+        sidebar.style.animation = 'slideInLeft 0.3s ease-out';
+    }
+});
+
+// Add slide animation for sidebar
+const sidebarStyle = document.createElement('style');
+sidebarStyle.textContent = `
+    @keyframes slideInLeft {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(sidebarStyle);
+
+// Enhanced filter function with animation
+function filterPlayers() {
+    const branchFilter = document.getElementById('branchFilter').value;
+    const yearFilter = document.getElementById('yearFilter').value;
+    const searchTerm = document.getElementById('playerSearch').value.toLowerCase();
+    
+    const playerRows = document.querySelectorAll('#playerSectionTbody tr');
+    
+    playerRows.forEach((row, index) => {
+        const branch = row.cells[3].textContent;
+        const year = row.cells[4].textContent;
+        const name = row.cells[0].textContent.toLowerCase();
+        const email = row.cells[2].textContent.toLowerCase();
+        
+        let showRow = true;
+        
+        // Apply branch filter
+        if (branchFilter !== 'all' && branch !== branchFilter) {
+            showRow = false;
+        }
+        
+        // Apply year filter
+        if (yearFilter !== 'all' && year !== yearFilter) {
+            showRow = false;
+        }
+        
+        // Apply search filter
+        if (searchTerm && !name.includes(searchTerm) && !email.includes(searchTerm)) {
+            showRow = false;
+        }
+        
+        if (showRow) {
+            row.style.display = '';
+            // Add animation when showing
+            row.style.animation = `fadeInLeft 0.3s ease-out ${index * 0.05}s forwards`;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}

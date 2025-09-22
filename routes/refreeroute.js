@@ -148,7 +148,7 @@ router.post('/start-match', async(req, res)=>{
         const refEmail = req.session.refree.refEmail;
 
         // console.log(matchId);
-        console.log(settings);
+        // console.log(settings);
 
         if(settings.matchType == 'Boys Singles'){
 
@@ -285,6 +285,49 @@ router.post('/go-to-scorecard', async(req, res)=>{
     }
 });
 
+
+
+router.post('/complete-bye-match', async(req, res)=>{
+    try {
+
+        const {matchId, matchType} = req.body;
+
+        let model;
+        if (matchType === 'Boys Singles') model = singlesBoysMatches;
+        if (matchType === 'Girls Singles') model = singlesGirlsMatches;
+        if (matchType === 'Boys Doubles') model = doublesBoysMatches;
+        if (matchType === 'Girls Doubles') model = doublesGirlsMatches;
+
+        if (!model) return res.json({ success: false });
+
+        const match = await model.findById(matchId);
+        if (!match) return res.json({ success: false, message: "Match not found" });
+
+
+        let winEmail = match.email1 || match.teamt1email1; 
+        
+        // console.log(winEmail);
+        await model.findByIdAndUpdate(
+            matchId,
+            {
+                $set: {
+                    isComplete: true,
+                    winnerEmail: winEmail,
+                    status: 'Complete'
+                }
+            },
+            { new: true }
+        );
+
+        req.session.refree.isScorecard = false;
+        
+
+        return res.json({success: true});
+    } catch (error) {
+        console.log(error);
+        return res.json({success: false, message: 'Error occure in got to scorecard..'});
+    }
+});
 
 
 

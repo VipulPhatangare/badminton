@@ -76,6 +76,8 @@ async function takeMatchsInfo() {
         data.completedMatches.forEach(element => {
             completedMatches.push(element);
         });
+
+        console.log(completedMatches);
         
         const currentMatchSection = document.getElementById('currentMatchSection');
         const upcomingMatchesSection = document.getElementById('upcomingMatchesSection');
@@ -260,7 +262,6 @@ function renderCompletedMatches() {
         const row = document.createElement('tr');
         let player1 = '';
         let winner = '';
-        console.log(match);
         if(match.playerName1){
             player1 = match.playerName1;
             if(match.winnerEmail == match.email1){
@@ -285,12 +286,16 @@ function renderCompletedMatches() {
             player2 = match.teamName2;
         }
 
-        let score = '';
-        for(let i = 0; i < match.set.length-1; i++){
-            let element = match.set[i];
-            score += `${element.player1Point}-${element.player2Point}, `;
+        let score = 'Bye';
+        if(!match.isBye){
+            score = '';
+            for(let i = 0; i < match.set.length-1; i++){
+                let element = match.set[i];
+                score += `${element.player1Point}-${element.player2Point}, `;
+            }
+            score = score.replace(/,\s*$/, "");  
         }
-        score = score.replace(/,\s*$/, "");  
+        
         row.innerHTML = `
             <td>${match.matchNo}</td>
             <td>${player1} vs ${player2}</td>
@@ -319,6 +324,11 @@ function formatDate(dateString) {
 // Open start match modal with match details
 function openStartMatchModal(match) {
     // Store the match ID
+    if (match.isBye) {
+        
+        showByeConfirmation(match);
+        return;
+    }
     document.getElementById('selected-match-id').value = match._id;
     console.log("Selected match ID:", match._id);
     
@@ -370,7 +380,6 @@ function openStartMatchModal(match) {
             ${!match.isBye ? `<option value="${match.playerName2}">${match.playerName2 || 'Player 2'}</option>` : ''}
         `;
     } else {
-        // For doubles matches, show team names
         firstServerSelect.innerHTML = `
             <option value="${match.teamName1}">${match.teamName1 || 'Team 1'}</option>
             ${!match.isBye ? `<option value="${match.teamName2}">${match.teamName2 || 'Team 2'}</option>` : ''}
@@ -385,9 +394,84 @@ function openStartMatchModal(match) {
 }
 
 
+function showByeConfirmation(match) {
+    // Create and show a confirmation modal for bye matches
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.innerHTML = `
+        <div class="modal">
+            <span class="close-modal">&times;</span>
+            <h2 class="modal-title">Match ${match.matchNo} - Bye</h2>
+            <div style="text-align: center; padding: 20px;">
+                <p>This match has a bye. Do you want to complete it automatically?</p>
+                <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>Match Details:</strong><br>
+                    Match #${match.matchNo} - ${match.matchType}<br>
+                    ${match.playerName1 || match.teamName1 || 'N/A'} vs Bye
+                </div>
+                <div class="confirmation-buttons">
+                    <button class="btn btn-cancel" id="cancel-bye-btn">Cancel</button>
+                    <button class="btn btn-confirm" id="confirm-bye-btn">Complete Match</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    modal.querySelector('.close-modal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#cancel-bye-btn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#confirm-bye-btn').addEventListener('click', async () => {
+        // Print match info (you can replace this with your actual logic)
+        console.log("Completing bye match:", match);
+        
+        // Here you would typically make an API call to mark the match as completed
+        try {
+            const response = await fetch('/refree/complete-bye-match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ matchId: match._id, matchType: match.matchType })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                alert('Match completed successfully!');
+                // Refresh the page or update UI as needed
+                location.reload();
+            } else {
+                alert('Error completing match: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error completing bye match:', error);
+            alert('An error occurred while completing the match');
+        }
+        
+        document.body.removeChild(modal);
+    });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+
+
 function updateConfirmationModal(match, settings) {
     const isSingles = match.matchType === 'Boys Singles' || match.matchType === 'Girls Singles';
-    const serverName = settings.firstServer;
+    const serverName = settings.firstServer == 1 ? 
+        (isSingles ? match.playerName1 : match.teamName1) : 
+        (isSingles ? match.playerName2 : match.teamName2);
     
     document.getElementById('confirmation-details').innerHTML = `
         <p><strong>Match:</strong> #${match.matchNo} - ${match.matchType}</p>
@@ -837,3 +921,4 @@ function showPage(pageId) {
 document.addEventListener('DOMContentLoaded', async()=>{
     await init();
 });
+

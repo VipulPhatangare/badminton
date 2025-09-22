@@ -23,7 +23,8 @@ const state = {
     lastActions: [],
     matchNumber: 1,
     setResults: [],
-    matchData: null
+    matchData: null,
+    pendingSetWin: null // Track pending set win for confirmation
 };
 
 /* -------------------------
@@ -61,6 +62,12 @@ const winnerTitle = document.getElementById('winnerTitle');
 
 const setWinsContainer = document.getElementById('setWinsContainer');
 const setWinsList = document.getElementById('setWinsList');
+
+// Add new DOM elements for set win confirmation
+const setWinConfirmation = document.getElementById('setWinConfirmation');
+const setWinConfirmText = document.getElementById('setWinConfirmText');
+const setWinConfirmBtn = document.getElementById('setWinConfirmBtn');
+const setWinCancelBtn = document.getElementById('setWinCancelBtn');
 
 /* -------------------------
    Utility Helpers
@@ -157,6 +164,7 @@ function startMatch(){
     state.isMatchActive = true;
     state.lastActions = [];
     state.setResults = [];
+    state.pendingSetWin = null;
     updateAllUI();
 }
 
@@ -184,7 +192,7 @@ function addPointToPlayer(pIndex){
     if(!state.isMatchActive || state.currentSet === 0) return;
     const other = 1 - pIndex;
 
-    // Save snapshot for undo
+    // Save snapshot for undo (only for points, not set wins)
     state.lastActions.push({
         type: 'point',
         player: pIndex,
@@ -205,20 +213,24 @@ function addPointToPlayer(pIndex){
     state.scores[pIndex] = clamp(state.scores[pIndex] + 1, 0, 9999);
     animateScore(pIndex);
 
-    // Evaluate set-winning
-    evaluateSetState();
-    updateAllUI();
-    
-    // Update backend with new score
-    updateBackendScore();
+    // Check if this point would win the set and show confirmation
+    const setWinner = checkSetWinCondition();
+    if (setWinner !== null) {
+        // Show confirmation before awarding the set win
+        showSetWinConfirmation(setWinner);
+    } else {
+        // No set win, just update UI
+        evaluateSetState();
+        updateAllUI();
+        updateBackendScore();
+    }
 }
 
 /**
- * Evaluate set conditions after a point change.
- * - Normal win: reaches maxPoints and opponent < maxPoints - 1
- * - Deuce region: if both >= maxPoints - 1, need 2 point lead
+ * Check if the current score would win the set
+ * Returns the player index who would win, or null if no win
  */
-function evaluateSetState(){
+function checkSetWinCondition() {
     const m = state.maxPoints;
     const [a, b] = state.scores;
     const lead = Math.abs(a - b);
@@ -236,26 +248,39 @@ function evaluateSetState(){
         if(a >= deuceThreshold && b >= deuceThreshold){
             if(lead >= 2){
                 setWonBy = a > b ? 0 : 1;
-            } else {
-                // show advantage when lead ==1
-                if(lead === 1){
-                    showAdvantage(a > b ? 0 : 1);
-                } else {
-                    hideAdvantages();
-                }
             }
         } else {
             // Not both reached deuce threshold: if someone reached m and opponent <= m-2 OR lead >=2
             if(a >= m && a - b >= 2) setWonBy = 0;
             if(b >= m && b - a >= 2) setWonBy = 1;
+        }
+    }
+
+    return setWonBy;
+}
+
+/**
+ * Evaluate set conditions after a point change.
+ * - Normal win: reaches maxPoints and opponent < maxPoints - 1
+ * - Deuce region: if both >= maxPoints - 1, need 2 point lead
+ */
+function evaluateSetState(){
+    const m = state.maxPoints;
+    const [a, b] = state.scores;
+    const lead = Math.abs(a - b);
+
+    // Determine if we are in deuce region
+    const deuceThreshold = m - 1;
+
+    if(a >= deuceThreshold && b >= deuceThreshold){
+        // show advantage when lead ==1
+        if(lead === 1){
+            showAdvantage(a > b ? 0 : 1);
+        } else {
             hideAdvantages();
         }
     } else {
         hideAdvantages();
-    }
-
-    if(setWonBy !== null){
-        handleSetWin(setWonBy);
     }
 }
 
@@ -287,19 +312,8 @@ async function handleSetWin(winnerIndex){
     // Flash their panel
     showFlash(winnerIndex);
 
-    // Save action for undo
-    state.lastActions.push({
-        type: 'set-win',
-        player: winnerIndex,
-        prev: {
-            scores: [ ...state.scores ],
-            setsWon: [ ...state.setsWon ].map((s,i)=> i===winnerIndex ? s-1 : s),
-            currentSet: state.currentSet,
-            server: state.server,
-            setHistory: JSON.parse(JSON.stringify(state.setHistory)),
-            setResults: JSON.parse(JSON.stringify(state.setResults))
-        }
-    });
+    // Clear the undo history when a set is won
+    state.lastActions = [];
 
     // Update backend with set completion
     await updateBackendSetCompletion(winnerIndex);
@@ -332,27 +346,64 @@ function hideAdvantages(){
     advEls.forEach(e => e.style.display = 'none');
 }
 
-/* Undo functionality */
+/* Undo functionality - Only works for points, not set wins */
 function undoLastAction() {
     if (state.lastActions.length === 0) return;
     
     const lastAction = state.lastActions.pop();
-    const prev = lastAction.prev;
     
-    // Restore previous state
-    state.scores = prev.scores;
-    state.setsWon = prev.setsWon;
-    state.currentSet = prev.currentSet;
-    state.server = prev.server;
-    state.setHistory = prev.setHistory;
-    state.setResults = prev.setResults;
-    
-    // If we're undoing the first action of a set, we might need to reactivate the match
-    if (state.currentSet > 0) {
-        state.isMatchActive = true;
+    // Only allow undoing point actions, not set wins
+    if (lastAction.type === 'point') {
+        const prev = lastAction.prev;
+        
+        // Restore previous state
+        state.scores = prev.scores;
+        state.setsWon = prev.setsWon;
+        state.currentSet = prev.currentSet;
+        state.server = prev.server;
+        state.setHistory = prev.setHistory;
+        state.setResults = prev.setResults;
+        
+        // If we're undoing the first action of a set, we might need to reactivate the match
+        if (state.currentSet > 0) {
+            state.isMatchActive = true;
+        }
+        
+        updateAllUI();
+        
+        // Also update backend with the restored score
+        updateBackendScore();
     }
+}
+
+/* -------------------------
+   Set Win Confirmation
+   ------------------------- */
+function showSetWinConfirmation(winnerIndex) {
+    state.pendingSetWin = winnerIndex;
+    const winnerName = document.getElementById(`name${winnerIndex}`).textContent.trim() || `Player ${winnerIndex + 1}`;
+    const score = `${state.scores[winnerIndex]}-${state.scores[1-winnerIndex]}`;
     
-    updateAllUI();
+    setWinConfirmText.innerHTML = `<strong>${winnerName}</strong> would win Set ${state.currentSet} with a score of ${score}. Confirm?`;
+    setWinConfirmation.classList.remove('hidden');
+}
+
+function hideSetWinConfirmation() {
+    setWinConfirmation.classList.add('hidden');
+    state.pendingSetWin = null;
+}
+
+function confirmSetWin() {
+    if (state.pendingSetWin !== null) {
+        handleSetWin(state.pendingSetWin);
+        hideSetWinConfirmation();
+    }
+}
+
+function cancelSetWin() {
+    // Revert the last point if canceled
+    undoLastAction();
+    hideSetWinConfirmation();
 }
 
 /* -------------------------
@@ -414,13 +465,15 @@ async function updateBackendSetCompletion(winnerIndex) {
             })
         });
 
-    
-
         const data = await response.json();
         
         if (!data.success) {
             console.error('Failed to update set completion on backend');
+        }else{
+            document.getElementById('advBadge0').style.display = 'none';
+            document.getElementById('advBadge1').style.display = 'none';
         }
+        
     } catch (error) {
         console.error('Error updating set completion:', error);
     }
@@ -583,6 +636,10 @@ setCancelBtn.addEventListener('click', () => {
     hideSetConfirmation();
 });
 
+// set win confirmation buttons
+setWinConfirmBtn.addEventListener('click', confirmSetWin);
+setWinCancelBtn.addEventListener('click', cancelSetWin);
+
 // toggle server manually
 toggleServeBtn.addEventListener('click', ()=>{
     state.server = 1 - state.server;
@@ -658,7 +715,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const set = matchData.set[i];
                     if (set.isSetComplete) {
                         const winnerIndex = set.player1Point > set.player2Point ? 0 : 1;
-                        const winnerName = winnerIndex === 0 ? matchData.playerName1 : matchData.playerName2;
+                        let winnerName = '';
+                        if(matchData.playerName1){
+                            winnerName = winnerIndex === 0 ? matchData.playerName1 : matchData.playerName2;
+                        }else{
+                            winnerName = winnerIndex === 0 ? matchData.teamName1 : matchData.teamName2;
+                        }
+                         
                         const score = `${set.player1Point}-${set.player2Point}`;
                         
                         state.setResults.push({

@@ -177,13 +177,13 @@ router.post('/complete-match', async (req, res) => {
 
         if (!model) return res.json({ success: false });
 
-        console.log('match complet info: ');
-        console.log(winnerIndex, matchId, matchType, model);
+        // console.log('match complet info: ');
+        // console.log(winnerIndex, matchId, matchType, model);
         // Get the match first
         const match = await model.findById(matchId);
         if (!match) return res.json({ success: false, message: "Match not found" });
 
-        console.log(match);
+        // console.log(match);
         let winEmail;
         // console.log(winnerIndex);
         if (winnerIndex === 0) {
@@ -192,7 +192,7 @@ router.post('/complete-match', async (req, res) => {
             winEmail = match.email2 || match.teamt2email1;
         }
 
-        console.log(winEmail);
+        // console.log(winEmail);
         await model.findByIdAndUpdate(
             matchId,
             {

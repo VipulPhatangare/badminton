@@ -381,11 +381,11 @@ function calculateRegistrationCounts() {
     
     const boysDoublesCount = centralObj.players.filter(player => 
         player.gender === 'Male' && player.doubles
-    ).length;
+    ).length / 2;
     
     const girlsDoublesCount = centralObj.players.filter(player => 
         player.gender === 'Female' && player.doubles
-    ).length;
+    ).length / 2;
     
     // Update the count badges
     document.getElementById('boysSinglesCount').innerHTML = 
@@ -1071,11 +1071,11 @@ function calculateRegistrationCounts() {
     
     const boysDoublesCount = centralObj.players.filter(player => 
         player.gender === 'Male' && player.doubles
-    ).length;
+    ).length/2;
     
     const girlsDoublesCount = centralObj.players.filter(player => 
         player.gender === 'Female' && player.doubles
-    ).length;
+    ).length/2;
     
     // Update the count badges
     document.getElementById('boysSinglesCount').innerHTML = 

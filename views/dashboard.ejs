@@ -86,6 +86,7 @@
                                 <option value="Civil">Civil Engineering</option>
                                 <option value="ENTC">ENTC</option>
                                 <option value="MCA">MCA</option>
+                                <option value="MBA">MBA</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -98,9 +99,39 @@
                                 <option value="Final Year">Final Year</option>
                             </select>
                         </div>
+                        <div class="filter-group">
+                            <div class="filter-label">Category</div>
+                            <select id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                <option value="Boys Singles">Boys Singles</option>
+                                <option value="Girls Singles">Girls Singles</option>
+                                <option value="Boys Doubles">Boys Doubles</option>
+                                <option value="Girls Doubles">Girls Doubles</option>
+                            </select>
+                        </div>
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="playerSearch" placeholder="Search players...">
+                        </div>
+                        
+                        <!-- Registration Counts -->
+                        <div class="registration-counts">
+                            <div class="count-badge" id="boysSinglesCount">
+                                <i class="fas fa-male"></i>
+                                <span>BS: 0</span>
+                            </div>
+                            <div class="count-badge" id="girlsSinglesCount">
+                                <i class="fas fa-female"></i>
+                                <span>GS: 0</span>
+                            </div>
+                            <div class="count-badge" id="boysDoublesCount">
+                                <i class="fas fa-male"></i><i class="fas fa-male"></i>
+                                <span>BD: 0</span>
+                            </div>
+                            <div class="count-badge" id="girlsDoublesCount">
+                                <i class="fas fa-female"></i><i class="fas fa-female"></i>
+                                <span>GD: 0</span>
+                            </div>
                         </div>
                     </div>
 

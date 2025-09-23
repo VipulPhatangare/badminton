@@ -205,8 +205,6 @@ async function takePlayerInfo() {
                 data.doublesGirlsMatchesList
             );
 
-        // console.log(centralObj.allMatches);
-
         centralObj.totalMatchesCount = 
             data.singlesBoysMatchesList.length + 
             data.singlesGirlsMatchesList.length +
@@ -238,6 +236,7 @@ async function takePlayerInfo() {
             }
         });
         
+        // Update dashboard cards
         document.getElementById('dashboardCardsInfo').innerHTML = `
                     <div class="card stat-card">
                         <div class="stat-label">Total Players</div>
@@ -255,7 +254,7 @@ async function takePlayerInfo() {
                     </div>
                     <div class="card stat-card">
                         <div class="stat-label">Completed Matches</div>
-                        <div class="stat-value">${centralObj.totalMatchesCount-centralObj.totalUpcomingMatches.length}</div>
+                        <div class="stat-value">${centralObj.totalMatchesCount - centralObj.totalUpcomingMatches.length}</div>
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
@@ -269,17 +268,20 @@ async function takePlayerInfo() {
                     </div>
         `;
 
-        dashboardUpcomingMatches = document.getElementById('dashboardUpcomingMatches');
+        // Calculate and update registration counts
+        calculateRegistrationCounts();
+
+        // Update upcoming matches section
+        const dashboardUpcomingMatches = document.getElementById('dashboardUpcomingMatches');
         dashboardUpcomingMatches.innerHTML = '';
-        // centralObj.totalUpcomingMatches = dummy1;
-        if(centralObj.totalUpcomingMatches.length == 0){
+        
+        if(centralObj.totalUpcomingMatches.length === 0){
             dashboardUpcomingMatches.innerHTML = `
                  <div class="section-header" style="justify-content: center;">
                         <h1 class="section-title" style="font-size: 30px;">No any upcoming matches.</h1>
-                        
-                    </div>
+                </div>
             `;
-        }else{
+        } else {
             let tableContent = `
                     <div class="section-header">
                         <h2 class="section-title">Upcoming Matches</h2>
@@ -296,8 +298,6 @@ async function takePlayerInfo() {
                         </div>
                         </div>
                     </div>
-
-                    <!-- Add this filter bar in the Recent Matches section -->
                     
                     <div class="table-container">
                         <table>
@@ -308,14 +308,12 @@ async function takePlayerInfo() {
                                     <th>Round</th>
                                     <th>Players / Teams</th>
                                     <th>Date & Time</th>
-                                    
                                 </tr>
                             </thead>
                             <tbody>
             `;
 
             let count = 1;
-            // console.log(centralObj.totalUpcomingMatches);
             centralObj.totalUpcomingMatches.forEach(element => {
                 if(element.playerName1 && element.playerName2){
                     tableContent += `
@@ -325,9 +323,8 @@ async function takePlayerInfo() {
                                     <td>${element.round}</td>
                                     <td>${element.playerName1} vs ${element.playerName2}</td>
                                     <td>${element.date}, ${element.time}</td>
-                                    
                                 </tr>`;
-                }else{
+                } else {
                     tableContent += `
                                 <tr>
                                     <td>${count++}</td>
@@ -335,7 +332,6 @@ async function takePlayerInfo() {
                                     <td>${element.round}</td>
                                     <td>${element.teamName1} vs ${element.teamName2}</td>
                                     <td>${element.date}, ${element.time}</td>
-                                    
                                 </tr>`;
                 }
             });
@@ -347,10 +343,62 @@ async function takePlayerInfo() {
             `;
 
             dashboardUpcomingMatches.innerHTML = tableContent;
+
+            // Re-attach event listener for category filter
+            const categoryFilter = document.getElementById('matchCategoryFilter');
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', filterMatchesByCategory);
+            }
         }
+
     } catch (error) {
-        console.error(error);
+        console.error('Error in takePlayerInfo:', error);
     }
+}
+
+// Registration counts calculation function
+function calculateRegistrationCounts() {
+    if (!centralObj.players || centralObj.players.length === 0) {
+        // Set counts to zero if no players data
+        document.getElementById('boysSinglesCount').innerHTML = 
+            `<i class="fas fa-male"></i><span>BS: 0</span>`;
+        document.getElementById('girlsSinglesCount').innerHTML = 
+            `<i class="fas fa-female"></i><span>GS: 0</span>`;
+        document.getElementById('boysDoublesCount').innerHTML = 
+            `<i class="fas fa-male"></i><i class="fas fa-male"></i><span>BD: 0</span>`;
+        document.getElementById('girlsDoublesCount').innerHTML = 
+            `<i class="fas fa-female"></i><i class="fas fa-female"></i><span>GD: 0</span>`;
+        return;
+    }
+
+    const boysSinglesCount = centralObj.players.filter(player => 
+        player.gender === 'Male' && player.singles
+    ).length;
+    
+    const girlsSinglesCount = centralObj.players.filter(player => 
+        player.gender === 'Female' && player.singles
+    ).length;
+    
+    const boysDoublesCount = centralObj.players.filter(player => 
+        player.gender === 'Male' && player.doubles
+    ).length;
+    
+    const girlsDoublesCount = centralObj.players.filter(player => 
+        player.gender === 'Female' && player.doubles
+    ).length;
+    
+    // Update the count badges
+    document.getElementById('boysSinglesCount').innerHTML = 
+        `<i class="fas fa-male"></i><span>BS: ${boysSinglesCount}</span>`;
+    
+    document.getElementById('girlsSinglesCount').innerHTML = 
+        `<i class="fas fa-female"></i><span>GS: ${girlsSinglesCount}</span>`;
+    
+    document.getElementById('boysDoublesCount').innerHTML = 
+        `<i class="fas fa-male"></i><i class="fas fa-male"></i><span>BD: ${boysDoublesCount}</span>`;
+    
+    document.getElementById('girlsDoublesCount').innerHTML = 
+        `<i class="fas fa-female"></i><i class="fas fa-female"></i><span>GD: ${girlsDoublesCount}</span>`;
 }
 
 function playersSectionInfo() {
@@ -390,9 +438,6 @@ function playersSectionInfo() {
                     year = 'Final Year';
                 }
 
-                if(element.playerName1 && element.playerName2){
-                    
-                }
                 trTag.innerHTML = `
                                     <td>${element.name}</td>
                                     <td>${element.phone}</td>
@@ -419,15 +464,20 @@ function playersSectionInfo() {
             }
         });
 
+        // Calculate and display registration counts
+        calculateRegistrationCounts();
+
         // Set up filter event listeners
         document.getElementById('branchFilter').addEventListener('change', filterPlayers);
         document.getElementById('yearFilter').addEventListener('change', filterPlayers);
+        document.getElementById('categoryFilter').addEventListener('change', filterPlayers);
         document.getElementById('playerSearch').addEventListener('input', filterPlayers);
 
     } catch (error) {
         console.log(error);
     }
 }
+
 
 function filterPlayers() {
     const branchFilter = document.getElementById('branchFilter').value;
@@ -1010,6 +1060,40 @@ categoryCards.forEach(card => {
     });
 });
 
+function calculateRegistrationCounts() {
+    const boysSinglesCount = centralObj.players.filter(player => 
+        player.gender === 'Male' && player.singles
+    ).length;
+    
+    const girlsSinglesCount = centralObj.players.filter(player => 
+        player.gender === 'Female' && player.singles
+    ).length;
+    
+    const boysDoublesCount = centralObj.players.filter(player => 
+        player.gender === 'Male' && player.doubles
+    ).length;
+    
+    const girlsDoublesCount = centralObj.players.filter(player => 
+        player.gender === 'Female' && player.doubles
+    ).length;
+    
+    // Update the count badges
+    document.getElementById('boysSinglesCount').innerHTML = 
+        `<i class="fas fa-male"></i><span>BS: ${boysSinglesCount}</span>`;
+    
+    document.getElementById('girlsSinglesCount').innerHTML = 
+        `<i class="fas fa-female"></i><span>GS: ${girlsSinglesCount}</span>`;
+    
+    document.getElementById('boysDoublesCount').innerHTML = 
+        `<i class="fas fa-male"></i><i class="fas fa-male"></i><span>BD: ${boysDoublesCount}</span>`;
+    
+    document.getElementById('girlsDoublesCount').innerHTML = 
+        `<i class="fas fa-female"></i><i class="fas fa-female"></i><span>GD: ${girlsDoublesCount}</span>`;
+}
+
+
+
+
 // Next button functionality
 nextButton.addEventListener('click', async function() {
     try {
@@ -1113,10 +1197,10 @@ sidebarStyle.textContent = `
 `;
 document.head.appendChild(sidebarStyle);
 
-// Enhanced filter function with animation
 function filterPlayers() {
     const branchFilter = document.getElementById('branchFilter').value;
     const yearFilter = document.getElementById('yearFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
     const searchTerm = document.getElementById('playerSearch').value.toLowerCase();
     
     const playerRows = document.querySelectorAll('#playerSectionTbody tr');
@@ -1124,6 +1208,7 @@ function filterPlayers() {
     playerRows.forEach((row, index) => {
         const branch = row.cells[3].textContent;
         const year = row.cells[4].textContent;
+        const category = row.cells[5].textContent;
         const name = row.cells[0].textContent.toLowerCase();
         const email = row.cells[2].textContent.toLowerCase();
         
@@ -1136,6 +1221,11 @@ function filterPlayers() {
         
         // Apply year filter
         if (yearFilter !== 'all' && year !== yearFilter) {
+            showRow = false;
+        }
+        
+        // Apply category filter
+        if (categoryFilter !== 'all' && !category.includes(categoryFilter)) {
             showRow = false;
         }
         

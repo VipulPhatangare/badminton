@@ -85,7 +85,7 @@ nextToStep2.addEventListener('click', () => {
 sendOtp.addEventListener('click', async() => {
     const email = document.getElementById('email').value;
     
-    if (email && email.endsWith('@pccoepune.org')) {
+    if (email && (email.endsWith('@pccoepune.org') || email.endsWith('@sbpatilmba.com'))) {
         
         try {
            
@@ -123,7 +123,7 @@ document.getElementById('resendOtp').addEventListener('click',async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     
-    if (email && email.endsWith('@pccoepune.org')) {
+    if (email && (email.endsWith('@pccoepune.org') || email.endsWith('@sbpatilmba.com'))) {
         
         try {
            
@@ -148,7 +148,7 @@ document.getElementById('resendOtp').addEventListener('click',async (e) => {
         }
 
     } else {
-        showNotification('Please enter a valid PCCOE email address.', 'error');
+        showNotification('Please enter a valid PCCOE or SB PATIL email address.', 'error');
     }
 });
 
@@ -228,7 +228,7 @@ loginForm.addEventListener('submit', async (e) => {
         }
 
         
-        if (loginEmail && loginEmail.endsWith('@pccoepune.org')){
+        if (loginEmail && (loginEmail.endsWith('@pccoepune.org') || loginEmail.endsWith('@sbpatilmba.com'))){
             const res = await fetch("/auth/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -255,7 +255,7 @@ loginForm.addEventListener('submit', async (e) => {
 
             
         }else{
-            showNotification('Please enter a valid PCCOE email address.', 'error');
+            showNotification('Please enter a valid PCCOE or SB PATIL email address.', 'error');
             return;
         }
         
@@ -464,7 +464,7 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
     
     const resetEmail = document.getElementById('resetEmail').value;
     
-    if (resetEmail && resetEmail.endsWith('@pccoepune.org')) {
+    if (resetEmail && (resetEmail.endsWith('@pccoepune.org') || resetEmail.endsWith('@sbpatilmba.com'))) {
         const sendResetLink = document.getElementById('sendResetLink');
         sendResetLink.disabled = true;
         sendResetLink.textContent = 'Sending...';
@@ -494,7 +494,7 @@ forgotPasswordForm.addEventListener('submit', async (e) => {
             sendResetLink.textContent = 'Send Reset Link';
         }
     } else {
-        showNotification('Please enter a valid PCCOE email address.', 'error');
+        showNotification('Please enter a valid PCCOE or SB PATIL email address.', 'error');
     }
 });
 // Password visibility toggles

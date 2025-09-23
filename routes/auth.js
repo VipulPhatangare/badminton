@@ -68,9 +68,10 @@ router.post("/login", async (req, res) => {
 // OTP route
 router.post("/send-otp", async (req, res) => {
   const { email } = req.body;
+  // console.log(email);
 
-  if (!email.endsWith("@pccoepune.org")) {
-    return res.status(400).json({ error: "Email must end with @pccoepune.org" });
+  if (!email.endsWith("@pccoepune.org") && !email.endsWith("@sbpatilmba.com") ) {
+    return res.status(400).json({ isOptsent: false,message: "Email must end with @pccoepune.org" });
   }
 
   const otp = generateOtp();

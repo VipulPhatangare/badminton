@@ -84,7 +84,7 @@ nextToStep2.addEventListener('click', () => {
 // OTP Verification
 sendOtp.addEventListener('click', async() => {
     const email = document.getElementById('email').value;
-    
+    // console.log(email);
     if (email && (email.endsWith('@pccoepune.org') || email.endsWith('@sbpatilmba.com'))) {
         
         try {
@@ -122,7 +122,7 @@ sendOtp.addEventListener('click', async() => {
 document.getElementById('resendOtp').addEventListener('click',async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
-    
+    // console.log(email);
     if (email && (email.endsWith('@pccoepune.org') || email.endsWith('@sbpatilmba.com'))) {
         
         try {

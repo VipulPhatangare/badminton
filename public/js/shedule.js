@@ -496,14 +496,18 @@ async function init() {
         if(typeOfMatch == 'BS' || typeOfMatch == 'GS'){
             if(gender == 'Male'){
                 matchCount = data2[0].singlesBoysMatchesCount;
+                document.getElementById('chageTitle').innerText = 'Boys Singles Match Allocation';
             }else{
                 matchCount = data2[0].singlesGirlsMatchesCount;
+                document.getElementById('chageTitle').innerText = 'Girls Singles Match Allocation';
             }
         }else{
             if(gender == 'Male'){
                 matchCount = data2[0].doublesBoysMatchesCount;
+                document.getElementById('chageTitle').innerText = 'Boys Doubles Match Allocation';
             }else{
                 matchCount = data2[0].doublesGirlsMatchesCount;
+                document.getElementById('chageTitle').innerText = 'Girls Doubles Match Allocation';
             }
         }
         // matchCount = allocatedMatches.length;

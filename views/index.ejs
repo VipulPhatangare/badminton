@@ -75,6 +75,22 @@
             font-size: 1.1rem;
             font-weight: 600;
         }
+
+        .whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: #25D366;
+            color: white !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-link:hover {
+            background-color: #128C7E;
+            transform: scale(1.05);
+        }
         
         @media (max-width: 768px) {
             .date-venue-container {
@@ -153,6 +169,20 @@
                     </div>
                     <h3>Venue</h3>
                     <p>Badminton Hall, PCCOE</p>
+                </div>
+                <div class="date-venue-item">
+                    <div class="date-venue-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3>Join WhatsApp Group</h3>
+                    <p>
+                        <a href="https://chat.whatsapp.com/DFbskJXCl167h2YeH5ZIPc?mode=ems_share_t" 
+                           target="_blank" 
+                           class="whatsapp-link"
+                           style="color: #25D366; text-decoration: none; font-weight: 600;">
+                            <i class="fab fa-whatsapp"></i> Click to Join
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>

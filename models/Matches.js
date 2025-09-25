@@ -35,6 +35,7 @@ const singlesBoysMatchesSchema = new mongoose.Schema({
     winnerEmail: String,
     isComplete: Boolean,
     matchType: String,
+    nextRound:String
 });
 
 const singlesGirlsMatchesSchema = new mongoose.Schema({
@@ -56,7 +57,8 @@ const singlesGirlsMatchesSchema = new mongoose.Schema({
     court: Number,
     winnerEmail: String,
     isComplete: Boolean,
-    matchType: String
+    matchType: String,
+    nextRound:String
 });
 
 const doublesGirlsMatchesSchema = new mongoose.Schema({
@@ -80,7 +82,8 @@ const doublesGirlsMatchesSchema = new mongoose.Schema({
     court: Number,
     winnerEmail: String,
     isComplete: Boolean,
-    matchType: String
+    matchType: String,
+    nextRound:String
 });
 
 const doublesBoysMatchesSchema = new mongoose.Schema({
@@ -104,7 +107,8 @@ const doublesBoysMatchesSchema = new mongoose.Schema({
     court: Number,
     winnerEmail: String,
     isComplete: Boolean,
-    matchType: String
+    matchType: String,
+    nextRound:String
 });
 
 

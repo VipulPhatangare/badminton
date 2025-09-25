@@ -235,12 +235,59 @@ async function takePlayerInfo() {
                 centralObj.totalUpcomingMatches.push(element);
             }
         });
+
+
+        const boysSinglesCount = centralObj.players.filter(player => 
+            player.gender === 'Male' && player.singles
+        ).length; 
+        
+        const girlsSinglesCount = centralObj.players.filter(player => 
+            player.gender === 'Female' && player.singles
+        ).length;
+        
+        const boysDoublesCount = centralObj.players.filter(player => 
+            player.gender === 'Male' && player.doubles
+        ).length / 2;
+        
+        const girlsDoublesCount = centralObj.players.filter(player => 
+            player.gender === 'Female' && player.doubles
+        ).length / 2;
+
+
         
         // Update dashboard cards
         document.getElementById('dashboardCardsInfo').innerHTML = `
                     <div class="card stat-card">
                         <div class="stat-label">Total Players</div>
                         <div class="stat-value">${centralObj.players.length}</div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Boys Singles</div>
+                        <div class="stat-value">${boysSinglesCount}</div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Girls Singles</div>
+                        <div class="stat-value">${girlsSinglesCount}</div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Boys Doubles</div>
+                        <div class="stat-value">${boysDoublesCount}</div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Girls Doubles</div>
+                        <div class="stat-value">${girlsDoublesCount}</div>
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
@@ -373,7 +420,7 @@ function calculateRegistrationCounts() {
 
     const boysSinglesCount = centralObj.players.filter(player => 
         player.gender === 'Male' && player.singles
-    ).length;
+    ).length; 
     
     const girlsSinglesCount = centralObj.players.filter(player => 
         player.gender === 'Female' && player.singles

@@ -107,16 +107,22 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //   }
 // }
 
-router.get('/',async(req, res)=>{
-  try {
-    // await addMatchCounter();
-    // await seed();
-    res.send('Api Not Woking');
+// router.get('/',async(req, res)=>{
+//   try {
+//     // await addMatchCounter();
+//     // await seed();
+
+//     await doublesBoysMatches.updateMany(
+//     {}, // empty filter means all documents
+//     { $set: { nextRound: "Round2" } }
+//   );
+
+//     res.send('Api Not Woking');
     
-  } catch (error) {
-    console.log(error);
-  }
-});
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 
 module.exports = router;

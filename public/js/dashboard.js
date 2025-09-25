@@ -450,8 +450,16 @@ function calculateRegistrationCounts() {
 
 function playersSectionInfo() {
     try {
-        playerSectionTbody = document.getElementById('playerSectionTbody');
+        const playerSectionTbody = document.getElementById('playerSectionTbody');
+        if (!playerSectionTbody) return; // Exit if element doesn't exist
+        
         playerSectionTbody.innerHTML = ''; // Clear existing content
+        
+        // Check if centralObj.players exists
+        if (!centralObj.players) {
+            console.log('No player data available');
+            return;
+        }
         
         centralObj.players.forEach(element => {
             if(element.singles || element.doubles){
@@ -756,10 +764,64 @@ async function takeRefreeInfo() {
 }
 
 
-document.addEventListener('DOMContentLoaded', async()=>{
-    await takePlayerInfo();
-    await takeMatchInfo();
-    await takeRefreeInfo();
+document.addEventListener('DOMContentLoaded', async()=>{    
+    if(window.isAdminLoggedIn){
+        try {
+            // Hide login modal
+            if (loginModal) {
+                loginModal.style.opacity = '0';
+                loginModal.style.transition = 'opacity 0.5s ease';
+                loginModal.style.display = 'none';
+            }
+            document.body.style.overflow = 'auto';
+            
+            // Show dashboard content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.display = 'block';
+                mainContent.classList.add('logged-in');
+            }
+
+            // Load all data
+            try {
+                await takePlayerInfo();
+                await takeMatchInfo();
+                await takeRefreeInfo();
+                
+                // Update UI with loaded data
+                playersSectionInfo();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                alert('Error loading data. Please try refreshing the page.');
+            }
+        } catch (error) {
+            console.error('Error initializing dashboard:', error);
+        }
+    } else {
+        try {
+            // Hide dashboard content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.display = 'none';
+            }
+            
+            // Show login modal
+            if (loginModal) {
+                loginModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Focus on email input
+                setTimeout(() => {
+                    if (loginEmail) {
+                        loginEmail.focus();
+                    }
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error showing login modal:', error);
+        }
+    }
+    
 
     const categoryFilter = document.getElementById('matchCategoryFilter');
     if (categoryFilter) {
@@ -1290,3 +1352,311 @@ function filterPlayers() {
         }
     });
 }
+
+
+
+
+// Login functionality
+const loginModal = document.getElementById('loginModal');
+const loginForm = document.getElementById('loginForm');
+const loginEmail = document.getElementById('loginEmail');
+const loginPassword = document.getElementById('loginPassword');
+const loginError = document.getElementById('loginError');
+const loginSubmit = document.getElementById('loginSubmit');
+
+// Show login modal on page load
+// document.addEventListener('DOMContentLoaded', function() {
+    
+// });
+
+// Login form submission
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+    
+    // Clear previous error
+    loginError.classList.remove('show');
+
+    if(email && password){
+        try {
+            loginSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            loginSubmit.disabled = true;
+
+            const response = await fetch('/auth/admin-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    email: email, 
+                    password: password 
+                })
+            });
+        
+            const data = await response.json();
+            if(data.success){
+                // Update login state
+                window.isAdminLoggedIn = true;
+                
+                loginSubmit.innerHTML = '<i class="fas fa-check"></i> Success!';
+                
+                // Hide login modal with animation
+                loginModal.style.opacity = '0';
+                loginModal.style.transition = 'opacity 0.5s ease';
+                
+                // Show dashboard content
+                setTimeout(async () => {
+                    try {
+                        loginModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        
+                        const mainContent = document.querySelector('.main-content');
+                        mainContent.style.display = 'block';
+                        mainContent.classList.add('logged-in');
+                        
+                        // Load dashboard data
+                        await takePlayerInfo();
+                        await takeMatchInfo();
+                        await takeRefreeInfo();
+                        
+                        // Update UI
+                        playersSectionInfo();
+                        
+                        showLoginSuccess();
+                    } catch (error) {
+                        console.error('Error loading dashboard data:', error);
+                        alert('Error loading dashboard data. Please refresh the page.');
+                    }
+                }, 500);
+            } else {
+                loginError.classList.add('show');
+                loginSubmit.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                loginSubmit.disabled = false;
+                loginPassword.value = '';
+                loginPassword.focus();
+                
+                // Shake animation for error
+                loginForm.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    loginForm.style.animation = '';
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            loginSubmit.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+            loginSubmit.disabled = false;
+            loginError.classList.add('show');
+            loginError.textContent = 'Error connecting to server. Please try again.';
+        }
+    }
+});
+
+// Shake animation for login error
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+`;
+document.head.appendChild(shakeStyle);
+
+// Show login success notification
+function showLoginSuccess() {
+    const successNotification = document.createElement('div');
+    successNotification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #2a9d8f 0%, #1d887a 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+        z-index: 1000;
+        animation: slideInRight 0.5s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    successNotification.innerHTML = `
+        <i class="fas fa-check-circle" style="font-size: 1.2rem;"></i>
+        <span>Successfully logged in! Welcome to Dashboard</span>
+    `;
+    
+    document.body.appendChild(successNotification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        successNotification.style.animation = 'slideOutRight 0.5s ease-out';
+        setTimeout(() => {
+            document.body.removeChild(successNotification);
+        }, 500);
+    }, 3000);
+}
+
+// Add slide animations for notification
+const notificationStyle = document.createElement('style');
+notificationStyle.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(notificationStyle);
+
+// Prevent closing the login modal by clicking outside
+loginModal.addEventListener('click', function(e) {
+    if (e.target === loginModal) {
+        // Optional: Add a subtle shake effect when trying to click outside
+        loginModal.style.animation = 'shake 0.3s ease-in-out';
+        setTimeout(() => {
+            loginModal.style.animation = '';
+        }, 300);
+    }
+});
+
+// Enhance input fields with real-time validation
+loginEmail.addEventListener('input', function() {
+    if (loginError.classList.contains('show')) {
+        loginError.classList.remove('show');
+    }
+});
+
+loginPassword.addEventListener('input', function() {
+    if (loginError.classList.contains('show')) {
+        loginError.classList.remove('show');
+    }
+});
+
+// Add enter key support
+loginPassword.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        loginForm.dispatchEvent(new Event('submit'));
+    }
+});
+
+
+
+// Logout functionality
+const logoutBtn = document.getElementById('logoutBtn');
+const logoutModal = document.getElementById('logoutModal');
+const cancelLogout = document.getElementById('cancelLogout');
+const confirmLogout = document.getElementById('confirmLogout');
+
+// Show logout confirmation modal
+logoutBtn.addEventListener('click', function() {
+    logoutModal.classList.add('active');
+});
+
+// Cancel logout
+cancelLogout.addEventListener('click', function() {
+    logoutModal.classList.remove('active');
+});
+
+// Confirm logout
+confirmLogout.addEventListener('click', async function() {
+    try {
+        // Show loading state
+        confirmLogout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+        confirmLogout.disabled = true;
+        
+        // Send logout request to server
+        const response = await fetch('/auth/logout')
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update login state
+            window.isAdminLoggedIn = false;
+            
+            // Clear central object
+            centralObj.players = null;
+            centralObj.allMatches = null;
+            
+            // Show success message
+            showLogoutSuccess();
+            
+            // Redirect to dashboard after delay
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1500);
+        } else {
+            alert('Error logging out. Please try again.');
+            logoutModal.classList.remove('active');
+            confirmLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Yes, Logout';
+            confirmLogout.disabled = false;
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('Error logging out. Please try again.');
+        logoutModal.classList.remove('active');
+        confirmLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Yes, Logout';
+        confirmLogout.disabled = false;
+    }
+});
+
+// Show logout success notification
+function showLogoutSuccess() {
+    const successNotification = document.createElement('div');
+    successNotification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #2a9d8f 0%, #1d887a 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+        z-index: 1000;
+        animation: slideInRight 0.5s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    successNotification.innerHTML = `
+        <i class="fas fa-check-circle" style="font-size: 1.2rem;"></i>
+        <span>Logged out successfully! Redirecting...</span>
+    `;
+    
+    document.body.appendChild(successNotification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        successNotification.style.animation = 'slideOutRight 0.5s ease-out';
+        setTimeout(() => {
+            if (document.body.contains(successNotification)) {
+                document.body.removeChild(successNotification);
+            }
+        }, 500);
+    }, 3000);
+}
+
+// Close logout modal when clicking outside
+logoutModal.addEventListener('click', function(e) {
+    if (e.target === logoutModal) {
+        logoutModal.classList.remove('active');
+    }
+});
+

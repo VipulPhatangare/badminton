@@ -126,4 +126,24 @@ router.get("/logout", (req, res) => {
   });
 });
 
+
+router.post('/admin-login', (req, res)=>{
+  try {
+    const {email, password} = req.body;
+    if (email === 'vipul.phatangare23@pccoepune.org' && password === '654321'){
+      req.session.admin = {
+        email : email,
+        isLogin : true
+      };
+      // console.log("login Successfully done..");
+      return res.json({success: true});
+    }else{
+      return res.json({success: false});
+    }
+  } catch (error) {
+    console.log(error);
+    return res.json({success: false});
+  }
+});
+
 module.exports = router;

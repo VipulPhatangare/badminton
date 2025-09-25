@@ -53,9 +53,7 @@ app.get("/player", (req, res) => {
   res.render("player");
 });
 
-app.get("/dashboard", (req, res)=>{
-  res.render("dashboard");
-});
+
 
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);

@@ -15,7 +15,7 @@
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-shuttlecock"></i>
-                <span>Dashboard</span>
+                <span>Admin Dashboard</span>
             </div>
         </div>
         <div class="sidebar-menu">
@@ -35,6 +35,7 @@
                 <i class="fas fa-user-shield"></i>
                 <span>Referee</span>
             </div>
+            
         </div>
     </div>
 
@@ -50,6 +51,11 @@
                 <button class="schedule-btn" id="generateSchedule">
                     <i class="fas fa-calendar-plus"></i>
                     Generate Schedule
+                </button>
+
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
                 </button>
             </div>
         </div>
@@ -360,11 +366,71 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="login-modal-overlay" id="loginModal">
+        <div class="login-modal">
+            <!-- <div class="login-icon">
+                <i class="fas fa-shuttlecock"></i>
+            </div> -->
+            <h2 class="login-title">Shuttle Showdown</h2>
+            <p class="login-subtitle">Admin Dashboard Login</p>
+            
+            <form class="login-form" id="loginForm">
+                <div class="login-input-group">
+                    <input type="email" class="login-input" id="loginEmail" 
+                        placeholder="Enter your email" required>
+                </div>
+                
+                <div class="login-input-group">
+                    <input type="password" class="login-input" id="loginPassword" 
+                        placeholder="Enter your password" required>
+                </div>
+                
+                <div class="login-error" id="loginError">
+                    Invalid email or password
+                </div>
+                
+                <button type="submit" class="login-btn" id="loginSubmit">
+                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="close-modal">
+                <i class="fas fa-times"></i>
+            </div>
+            <h2 class="modal-title">Confirm Logout</h2>
+            <div class="modal-content">
+                <div class="modal-icon" style="text-align: center; font-size: 4rem; margin-bottom: 20px;">
+                    <i class="fas fa-sign-out-alt" style="color: #e74c3c;"></i>
+                </div>
+                <p style="text-align: center; margin-bottom: 25px; font-size: 1.1rem;">
+                    Are you sure you want to logout from the admin dashboard?
+                </p>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-secondary" id="cancelLogout">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-danger" id="confirmLogout">
+                    <i class="fas fa-sign-out-alt"></i> Yes, Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Animated Badminton Shuttlecock -->
     <div class="floating-shuttlecock">
         <i class="fas fa-shuttlecock"></i>
     </div>
-
+    <script>
+        let isLogin = "<%= isLogin %>" === "true";
+        window.isAdminLoggedIn = isLogin;
+    </script>
     <script src="/js/dashboard.js"></script>
 </body>
 </html>

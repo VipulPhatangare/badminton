@@ -3,6 +3,16 @@ const router = express.Router();
 const { playerInfo, refreeInfo } = require("../models/Player");
 const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches} = require("../models/Matches")
 
+
+router.get("/", (req, res)=>{
+  let isLogin = false;
+  if(req.session && req.session.admin && req.session.admin.isLogin){ // ✅ Check if admin exists first
+    isLogin = true;
+  }
+  res.render("dashboard",{isLogin});
+});
+
+
 router.get('/players-info', async(req, res)=>{
     try {
         const players = await playerInfo.find();

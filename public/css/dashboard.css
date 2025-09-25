@@ -144,8 +144,14 @@ body {
     text-align: center;
 }
 
+/* Show main content after login */
+.main-content.logged-in {
+    display: block;
+}
+
 /* Main Content */
 .main-content {
+    display: none;
     flex: 1;
     margin-left: var(--sidebar-width);
     position: relative;
@@ -244,6 +250,125 @@ body {
 /* Content Area */
 .content {
     padding: 30px;
+}
+
+/* Login Modal Styles */
+.login-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1a3c6e 0%, #2a4d7a 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    backdrop-filter: blur(10px);
+}
+
+.login-modal {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-top: 5px solid var(--accent);
+    animation: modalSlideIn 0.5s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.login-icon {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+.login-title {
+    color: var(--primary);
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+}
+
+.login-subtitle {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-input-group {
+    position: relative;
+}
+
+.login-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.login-input:focus {
+    border-color: var(--accent);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.2);
+}
+
+.login-btn {
+    background: linear-gradient(to right, var(--accent) 0%, #3a6ea5 100%);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(58, 110, 165, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    min-height: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.login-error.show {
+    opacity: 1;
 }
 
 /* Dashboard Cards with Animation */
@@ -1076,4 +1201,84 @@ select:focus, input:focus {
     font-size: 0.8rem;
 }
 
+/* Ensure modal content has proper spacing */
+.modal-content {
+    padding: 20px 0;
+}
+
+/* Style for logout modal specifically */
+#logoutModal .modal-content {
+    text-align: center;
+}
+
+#logoutModal .modal-icon {
+    font-size: 4rem;
+    color: #e74c3c;
+    margin-bottom: 20px;
+}
+
+
+/* Logout Button Styles */
+.logout-btn {
+    background: linear-gradient(to right, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(231, 76, 60, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.logout-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.logout-btn:hover:before {
+    left: 100%;
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(231, 76, 60, 0.4);
+    background: linear-gradient(to right, #c0392b 0%, #e74c3c 100%);
+}
+
+/* Make sure header actions have proper spacing */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Increased gap for better spacing */
+}
+
+/* Danger button style for logout confirmation */
+.btn-danger {
+    background: linear-gradient(to right, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(to right, #c0392b 0%, #e74c3c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
 

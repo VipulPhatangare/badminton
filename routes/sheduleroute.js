@@ -5,16 +5,17 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 
 router.get('/',(req, res)=>{
     const typeOfMatch = req.session.typeOfMatch;
+    const matchRound = req.session.sheduleRound;
     // console.log(typeOfMatch);
-    res.render('shedule',{typeOfMatch});
+    res.render('shedule',{typeOfMatch, matchRound});
 });
 
 router.post('/player-info', async(req, res)=>{
     try {
-        const {gender} = req.body;
+        const {gender, matchRound} = req.body;
         const result = await registerSingles.aggregate([
             {
-                $match: { gender: gender }  
+                $match: { gender: gender , round: matchRound}  
             },
             {
                 $lookup: {
@@ -43,10 +44,10 @@ router.post('/player-info', async(req, res)=>{
 
 router.post('/team-info', async(req, res)=>{
     try {
-        const {gender} = req.body;
+        const {gender, matchRound} = req.body;
         const result = await registerDoubles.aggregate([
             {
-                $match: { gender: gender } // ✅ filter doubles by gender (team gender)
+                $match: { gender: gender , round: matchRound} // ✅ filter doubles by gender (team gender)
             },
             {
                 $lookup: {
@@ -149,14 +150,14 @@ router.post('/allocate-match', async(req, res)=>{
             }
 
             await registerSingles.findOneAndUpdate(
-                { email: match.email1 },
+                { email: match.email1, round: match.round },
                 { $set: { isAllocated: true} },
                 { new: true } 
             );
 
             if(!match.isBye){
                 await registerSingles.findOneAndUpdate(
-                    { email: match.email2 },
+                    { email: match.email2 , round: match.round},
                     { $set: { isAllocated: true} },
                     { new: true } 
                 );
@@ -185,14 +186,14 @@ router.post('/allocate-match', async(req, res)=>{
             }
 
             await registerDoubles.findOneAndUpdate(
-                { email1: match.teamt1email1 },
+                { email1: match.teamt1email1 ,  round: match.round},
                 { $set: { isAllocated: true} },
                 { new: true } 
             );
 
             if(!match.isBye){
                 await registerDoubles.findOneAndUpdate(
-                    { email1: match.teamt2email1 },
+                    { email1: match.teamt2email1, round: match.round },
                     { $set: { isAllocated: true} },
                     { new: true } 
                 );

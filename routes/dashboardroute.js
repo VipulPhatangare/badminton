@@ -283,8 +283,9 @@ router.get('/allSinglesInfoMatches', async(req, res)=>{
 
 router.post('/save-shedule-type', (req, res)=>{
   try {
-    const {data1} = req.body;
-    req.session.typeOfMatch = data1;
+    const {category, round} = req.body;
+    req.session.typeOfMatch = category;
+    req.session.sheduleRound = round;
     // console.log(req.session.typeOfMatch);
     res.json({success: true});
   } catch (error) {

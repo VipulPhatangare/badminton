@@ -1332,3 +1332,14 @@ select:focus, input:focus {
     box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
+.round-card:hover {
+    background-color: #e8f4fd !important;
+    border-color: #457b9d !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.round-card.selected {
+    background-color: #e8f4fd !important;
+    border-color: #457b9d !important;
+}

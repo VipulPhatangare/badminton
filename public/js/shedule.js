@@ -4,81 +4,7 @@ let isSingles = true;
 let playersData = [];
 let teamsData = [];
 let allocatedMatches = [];
-let rounds = [];
-let currentRoundIndex = 0;
-
-// Default rounds as fallback
-const defaultRounds = ['Round 1', 'Round 2', 'Round 3', 'Round 4', 'Quarter Final', 'Semi Final', 'Final'];
-
-// Round input functions
-function saveRounds() {
-    const roundsInput = document.getElementById('roundsInput').value.trim();
-    
-    if (!roundsInput) {
-        showToast('Please enter rounds', 'error');
-        return;
-    }
-    
-    // Parse rounds from input
-    rounds = roundsInput.split(',')
-        .map(round => round.trim())
-        .filter(round => round.length > 0);
-    
-    if (rounds.length === 0) {
-        showToast('Please enter valid rounds', 'error');
-        return;
-    }
-    
-    // Hide rounds input modal and show main container
-    document.getElementById('roundsInputModal').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'block';
-    
-    // Initialize the application
-    initializeApp();
-}
-
-function useDefaultRounds() {
-    rounds = [...defaultRounds];
-    
-    // Hide rounds input modal and show main container
-    document.getElementById('roundsInputModal').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'block';
-    
-    // Initialize the application
-    initializeApp();
-}
-
-// Round navigation functions
-function nextRound() {
-    if (currentRoundIndex < rounds.length - 1) {
-        currentRoundIndex++;
-        updateRoundDisplay();
-    }
-}
-
-function previousRound() {
-    if (currentRoundIndex > 0) {
-        currentRoundIndex--;
-        updateRoundDisplay();
-    }
-}
-
-function updateRoundDisplay() {
-    document.getElementById('currentRound').textContent = rounds[currentRoundIndex];
-    document.getElementById('currentRoundDisplay').textContent = rounds[currentRoundIndex];
-    
-    // Update navigation buttons
-    const prevBtn = document.querySelector('.round-nav-btn:first-child');
-    const nextBtn = document.querySelector('.round-nav-btn:last-child');
-    
-    prevBtn.disabled = currentRoundIndex === 0;
-    nextBtn.disabled = currentRoundIndex === rounds.length - 1;
-}
-
-function getCurrentRound() {
-    return rounds[currentRoundIndex];
-}
-
+let round;
 // Generate time slots from 9am to 8pm
 function generateTimeSlots() {
     const timeSelect = document.getElementById('matchTime');
@@ -96,6 +22,33 @@ function generateTimeSlots() {
     }
 }
 
+// Create dummy data for players and teams
+function createDummyData() {
+    // Create players
+    for (let i = 1; i <= 16; i++) {
+        playersData.push({
+            id: i,
+            name: `Player ${i}`,
+            prn: `PRN${1000 + i}`,
+            email: `player${i}@example.com`
+        });
+    }
+    
+    // Create teams (pairs of players)
+    for (let i = 1; i <= 8; i++) {
+        const player1 = playersData[i * 2 - 2];
+        const player2 = playersData[i * 2 - 1];
+        
+        teamsData.push({
+            id: i,
+            name: `Team ${i}`,
+            player1: player1,
+            player2: player2
+        });
+    }
+}
+
+// Update dropdown based on singles/doubles selection
 // Update dropdown based on singles/doubles selection
 function updateDropdownOptions() {
     const player1Select = document.getElementById('player1');
@@ -198,6 +151,7 @@ function updatePlayer2Options() {
     player2Select.appendChild(byeOption);
 }
 
+
 // Show confirmation modal
 function showConfirmation() {
     const player1Select = document.getElementById('player1');
@@ -248,7 +202,6 @@ function showConfirmation() {
     
     const date = dateSelect.value;
     const time = timeSelect.value;
-    const round = getCurrentRound();
 
     let playerOrTeam = 'Player';
     if(!isSingles){
@@ -280,7 +233,7 @@ function showConfirmation() {
         </div>
         <div class="confirmation-item">
             <span class="confirmation-label">Round:</span>
-            <span>${round}</span>
+            <span>${matchRound}</span>
         </div>
     `;
     
@@ -313,6 +266,8 @@ async function confirmMatch() {
             matchType = 'Girls Doubles';
         }
 
+        
+
         const match = {};
         
         if (isSingles) {
@@ -331,7 +286,9 @@ async function confirmMatch() {
                 match.email2 = player2.player[0].email;
                 match.playerName2 = player2.player[0].name;
                 match.isBye = false;
+                
             }
+
 
         } else {
             const team1 = teamsData.find(t => t._id == player1Select.value);
@@ -351,22 +308,25 @@ async function confirmMatch() {
                 match.teamt2email1 = team2.player1[0].email;
                 match.teamt2email2 = team2.player2[0].email;
                 match.isBye = false;
+                
             }
+
+
         }
         
         const date = dateSelect.value;
         const time = timeSelect.value;
-        const round = getCurrentRound();
         let matchNumber = typeOfMatch+  `_${matchCount+1}`;
 
         match.matchType = matchType;
         match.date = date;
         match.time = time;
         match.matchType = matchType;
-        match.round = round;
+        match.round = matchRound;
         match.matchNo = matchNumber;
         match.status = 'Upcomming';
         match.isComplete = false;
+        
         
         const response = await fetch("/shedule/allocate-match", {
             method: "POST",
@@ -477,9 +437,28 @@ function renderAllocatedMatches() {
     });
 }
 
-// Initialize the application after rounds are set
-async function initializeApp() {
+
+// Initialize the page
+async function init() {
     try {
+
+        console.log(matchRound);
+
+        if(matchRound == 'round1'){
+            round = 'Round 1';
+        }else if(matchRound == 'round2'){
+            round = 'Round 2';
+        }else if(matchRound == 'round3'){
+            round = 'Round 3';
+        }else if(matchRound == 'quarter'){
+            round = 'Quarter Final';
+        }else if(matchRound == 'quarter'){
+            round = 'Quarter Final';
+        }else if(matchRound == 'quarter'){
+            round = 'Quarter Final';
+        }
+
+
         let gender = 'Female';
         if(typeOfMatch == 'BS' || typeOfMatch == 'BD'){
             gender = 'Male';
@@ -490,22 +469,23 @@ async function initializeApp() {
             const response = await fetch("/shedule/player-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({gender}),
+                body: JSON.stringify({gender, matchRound}),
             });
             
             playersData = await response.json();
-            console.log(playersData);
+            // console.log(playersData);
 
         }else{
             isSingles = false;
             const response = await fetch("/shedule/team-info", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({gender}),
+                body: JSON.stringify({gender, matchRound}),
             });
+
             
             teamsData = await response.json();
-            console.log(teamsData);
+            // console.log(teamsData);
         }
 
         const response1 = await fetch("/shedule/allocated-matches", {
@@ -544,16 +524,19 @@ async function initializeApp() {
                 document.getElementById('chageTitle').innerText = 'Girls Doubles Match Allocation';
             }
         }
+        // matchCount = allocatedMatches.length;
+
 
         updateMatchNumber();
         generateTimeSlots();
-        updateRoundDisplay(); // Set initial round display
+        // createDummyData();
         updateDropdownOptions();
         renderAllocatedMatches();
     } catch (error) {
         console.log(error);
     }
 }
+
 
 function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toastContainer');
@@ -569,4 +552,9 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
-// No need for DOMContentLoaded event since we're showing the rounds input modal first
+document.addEventListener("DOMContentLoaded", async function () {
+    await init();
+    
+    // Add event listener for player1 changes
+    document.getElementById('player1').addEventListener('change', updatePlayer2Options);
+});

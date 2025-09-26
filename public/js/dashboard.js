@@ -1170,7 +1170,15 @@ document.getElementById('generateSchedule').addEventListener('click', function()
 
 document.getElementById('cancelSchedule').addEventListener('click', function() {
     document.getElementById('generateScheduleModal').classList.remove('active');
+    resetScheduleModal();
 });
+
+function resetScheduleModal() {
+    selectedCategory = null;
+    selectedRound = null;
+    nextButton.textContent = 'Next';
+    nextButton.disabled = true;
+}
 
 // Category selection
 const categoryCards = document.querySelectorAll('.category-card');
@@ -1224,13 +1232,26 @@ function calculateRegistrationCounts() {
         `<i class="fas fa-female"></i><i class="fas fa-female"></i><span>GD: ${girlsDoublesCount}</span>`;
 }
 
+const roundDefinitions = {
+    'BS': ['round1', 'round2', 'round3', 'quarter', 'semi', 'final'],
+    'BD': ['round1', 'quarter', 'semi', 'final'],
+    'GS': ['round1', 'quarter', 'semi', 'final'],
+    'GD': ['round1', 'semi', 'final']
+};
+
+
+
 
 
 
 // Next button functionality
 nextButton.addEventListener('click', async function() {
     try {
-        if (selectedCategory) {
+        if (selectedCategory && !selectedRound) {
+            // First step: Category selected, show round selection
+            showRoundSelection();
+        } else if (selectedCategory && selectedRound) {
+            // Second step: Both category and round selected, generate schedule
             let data1 = '';
             if(selectedCategory == 'Boys Singles'){
                 data1 = 'BS';
@@ -1242,20 +1263,27 @@ nextButton.addEventListener('click', async function() {
                 data1 = 'GD';
             }
 
+            // Send both category and round to server
             const response = await fetch('/dashboard/save-shedule-type', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({data1})
+                body: JSON.stringify({
+                    category: data1,
+                    round: selectedRound
+                })
             });
 
             const data = await response.json();
 
             if(data.success){
+                // Close modal and redirect
+                document.getElementById('generateScheduleModal').classList.remove('active');
+                resetScheduleModal();
                 window.location.href = '/shedule';
             }else{
-                alert('Not save the shedule type.')
+                alert('Not save the schedule type.')
             }
         }
     } catch (error) {
@@ -1264,12 +1292,137 @@ nextButton.addEventListener('click', async function() {
     }
 });
 
+
 // Close modal when clicking outside or on close button
-document.querySelector('#generateScheduleModal .close-modal').addEventListener('click', function() {
-    document.getElementById('generateScheduleModal').classList.remove('active');
+document.getElementById('generateSchedule').addEventListener('click', function() {
+    document.getElementById('generateScheduleModal').classList.add('active');
+    showCategorySelection(); // Start with category selection
 });
 
+function showCategorySelection() {
+    const modalContent = document.querySelector('#generateScheduleModal .modal-content');
+    modalContent.innerHTML = `
+        <p>Select the tournament category you want to generate a schedule for:</p>
+        
+        <div class="category-cards">
+            <div class="category-card" data-category="Boys Singles">
+                <div class="card-icon">
+                    <i class="fas fa-male"></i>
+                </div>
+                <h3>Boys Singles</h3>
+            </div>
+            
+            <div class="category-card" data-category="Girls Singles">
+                <div class="card-icon">
+                    <i class="fas fa-female"></i>
+                </div>
+                <h3>Girls Singles</h3>
+            </div>
+            
+            <div class="category-card" data-category="Boys Doubles">
+                <div class="card-icon">
+                    <i class="fas fa-male"></i>
+                    <i class="fas fa-male"></i>
+                </div>
+                <h3>Boys Doubles</h3>
+            </div>
+            
+            <div class="category-card" data-category="Girls Doubles">
+                <div class="card-icon">
+                    <i class="fas fa-female"></i>
+                    <i class="fas fa-female"></i>
+                </div>
+                <h3>Girls Doubles</h3>
+            </div>
+        </div>
+    `;
 
+    // Update next button text
+    nextButton.textContent = 'Next';
+    nextButton.disabled = true;
+    selectedCategory = null;
+    selectedRound = null;
+
+    // Re-attach category card event listeners
+    const newCategoryCards = modalContent.querySelectorAll('.category-card');
+    newCategoryCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            newCategoryCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Enable next button
+            nextButton.disabled = false;
+            
+            // Store selected category
+            selectedCategory = this.getAttribute('data-category');
+        });
+    });
+}
+
+// Function to show round selection
+function showRoundSelection() {
+    if (!selectedCategory) return;
+
+    // Map category to round definition key
+    const categoryMap = {
+        'Boys Singles': 'BS',
+        'Girls Singles': 'GS',
+        'Boys Doubles': 'BD',
+        'Girls Doubles': 'GD'
+    };
+
+    const categoryKey = categoryMap[selectedCategory];
+    const rounds = roundDefinitions[categoryKey] || [];
+
+    const modalContent = document.querySelector('#generateScheduleModal .modal-content');
+    modalContent.innerHTML = `
+        <p>Select the round for <strong>${selectedCategory}</strong>:</p>
+        
+        <div class="round-selection" style="margin-top: 20px;">
+            ${rounds.map(round => `
+                <div class="round-card" data-round="${round}" style="
+                    background-color: #f8f9fa;
+                    border: 2px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-align: center;
+                ">
+                    <h4 style="margin: 0; color: #1a3c6e;">${round}</h4>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // Update next button text
+    nextButton.textContent = 'Generate Schedule';
+    nextButton.disabled = true;
+
+    // Attach round card event listeners
+    const roundCards = modalContent.querySelectorAll('.round-card');
+    roundCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            roundCards.forEach(c => c.style.backgroundColor = '#f8f9fa');
+            roundCards.forEach(c => c.style.borderColor = '#e9ecef');
+            
+            // Add selected style to clicked card
+            this.style.backgroundColor = '#e8f4fd';
+            this.style.borderColor = '#457b9d';
+            
+            // Enable next button
+            nextButton.disabled = false;
+            
+            // Store selected round
+            selectedRound = this.getAttribute('data-round');
+        });
+    });
+}
 
 // Add CSS classes for animations
 const style = document.createElement('style');
@@ -1306,6 +1459,7 @@ style.textContent = `
         }
     }
 `;
+
 document.head.appendChild(style);
 
 // Update menu toggle to add animation
@@ -1314,6 +1468,12 @@ menuToggle.addEventListener('click', function () {
     if (sidebar.classList.contains('active')) {
         sidebar.style.animation = 'slideInLeft 0.3s ease-out';
     }
+});
+
+
+document.querySelector('#generateScheduleModal .close-modal').addEventListener('click', function() {
+    document.getElementById('generateScheduleModal').classList.remove('active');
+    resetScheduleModal();
 });
 
 // Add slide animation for sidebar

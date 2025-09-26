@@ -201,7 +201,17 @@ router.post('/complete-match', async (req, res) => {
         } else {
             winEmail = match.email2 || match.teamt2email1;
         }
-
+        let winEmail1;
+        let winTeamName;
+        if((matchType === 'Boys Doubles') || (matchType === 'Girls Doubles')){
+            if(winEmail == match.teamt1email1){
+                winEmail1 = match.teamt1email2;
+                winTeamName = match.teamName1;
+            }else{
+                winEmail1 = match.teamt2email2;
+                winTeamName = match.teamName2;
+            }
+        }
         // console.log(winEmail);
         await model.findByIdAndUpdate(
             matchId,
@@ -216,15 +226,67 @@ router.post('/complete-match', async (req, res) => {
         );
 
 
-        if((matchType === 'Boys Singles') || (matchType === 'Girls Singles')){
+        if((matchType === 'Boys Singles')){
 
 
             let nextRound;
+            if(match.round == "round1"){
+                nextRound = "round2"
+            }else if(match.round == "round2"){
+                nextRound = "round3"
+            }else if(match.round == "round3"){
+                nextRound = "quarter"
+            }else if(match.round == "quarter"){
+                nextRound = "semi"
+            }else if(match.round == "semi"){
+                nextRound = "final"
+            }
+
+
+            const player = new registerSingles({ email: winEmail, gender: gender, isAllocated: false, round: nextRound});
+            await player.save();
+        }else if((matchType === 'Girls Singles')){
+
+
+            let nextRound;
+            if(match.round == "round1"){
+                nextRound = "quarter"
+            }else if(match.round == "quarter"){
+                nextRound = "semi"
+            }else if(match.round == "semi"){
+                nextRound = "final"
+            }
+
             
             const player = new registerSingles({ email: winEmail, gender: gender, isAllocated: false, round: nextRound});
             await player.save();
-        }else{
+        }else if((matchType === 'Boys Doubles')){
 
+
+            let nextRound;
+            if(match.round == "round1"){
+                nextRound = "quarter"
+            }else if(match.round == "quarter"){
+                nextRound = "semi"
+            }else if(match.round == "semi"){
+                nextRound = "final"
+            }
+
+            
+            const player = new registerDoubles({ teamName: winTeamName, email1: winEmail, email2: winEmail1, gender: gender, isAllocated: false, round: nextRound});
+            await player.save();
+        }else if((matchType === 'Girls Doubles')){
+
+
+            let nextRound;
+            if(match.round == "round1"){
+                nextRound = "semi"
+            }else if(match.round == "semi"){
+                nextRound = "final"
+            }
+
+            const player = new registerDoubles({ teamName: winTeamName, email1: winEmail, email2: winEmail1, gender: gender, isAllocated: false, round: nextRound});
+            await player.save();
         }
 
         

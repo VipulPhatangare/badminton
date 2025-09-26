@@ -1789,12 +1789,68 @@ body.mobile-nav-open {
     font-size: 1.3rem;
 }
 
+.set-winner {
+    font-size: 0.8rem;
+    color: var(--success);
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.sets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.set-item {
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.set-number {
+    font-size: 0.9rem;
+    color: var(--primary-red);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.set-score {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-gray);
+}
+
 .registration-closed-message p {
     color: #6c757d;
     margin: 0;
     font-size: 1rem;
 }
+.refresh-btn {
+    background: var(--gradient-red);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.refresh-btn:hover {
+    transform: scale(1.1);
+    background: var(--gradient-dark);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 .registration-closed-info {
     background: rgba(108, 117, 125, 0.1);
     padding: 15px;

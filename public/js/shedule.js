@@ -4,6 +4,7 @@ let isSingles = true;
 let playersData = [];
 let teamsData = [];
 let allocatedMatches = [];
+let rounds = ['Round 1', 'Round 2', 'Round 3', 'Round 4', 'Quarter Final', 'Semi Final', 'Final'];
 
 // Generate time slots from 9am to 8pm
 function generateTimeSlots() {
@@ -22,33 +23,19 @@ function generateTimeSlots() {
     }
 }
 
-// Create dummy data for players and teams
-function createDummyData() {
-    // Create players
-    for (let i = 1; i <= 16; i++) {
-        playersData.push({
-            id: i,
-            name: `Player ${i}`,
-            prn: `PRN${1000 + i}`,
-            email: `player${i}@example.com`
-        });
-    }
+// Populate rounds dropdown
+function populateRounds() {
+    const roundSelect = document.getElementById('round');
+    roundSelect.innerHTML = '';
     
-    // Create teams (pairs of players)
-    for (let i = 1; i <= 8; i++) {
-        const player1 = playersData[i * 2 - 2];
-        const player2 = playersData[i * 2 - 1];
-        
-        teamsData.push({
-            id: i,
-            name: `Team ${i}`,
-            player1: player1,
-            player2: player2
-        });
-    }
+    rounds.forEach(round => {
+        const option = document.createElement('option');
+        option.value = round;
+        option.textContent = round;
+        roundSelect.appendChild(option);
+    });
 }
 
-// Update dropdown based on singles/doubles selection
 // Update dropdown based on singles/doubles selection
 function updateDropdownOptions() {
     const player1Select = document.getElementById('player1');
@@ -150,7 +137,6 @@ function updatePlayer2Options() {
     byeOption.textContent = 'BYE';
     player2Select.appendChild(byeOption);
 }
-
 
 // Show confirmation modal
 function showConfirmation() {
@@ -269,8 +255,6 @@ async function confirmMatch() {
             matchType = 'Girls Doubles';
         }
 
-        
-
         const match = {};
         
         if (isSingles) {
@@ -289,9 +273,7 @@ async function confirmMatch() {
                 match.email2 = player2.player[0].email;
                 match.playerName2 = player2.player[0].name;
                 match.isBye = false;
-                
             }
-
 
         } else {
             const team1 = teamsData.find(t => t._id == player1Select.value);
@@ -311,10 +293,7 @@ async function confirmMatch() {
                 match.teamt2email1 = team2.player1[0].email;
                 match.teamt2email2 = team2.player2[0].email;
                 match.isBye = false;
-                
             }
-
-
         }
         
         const date = dateSelect.value;
@@ -330,7 +309,6 @@ async function confirmMatch() {
         match.matchNo = matchNumber;
         match.status = 'Upcomming';
         match.isComplete = false;
-
         
         const response = await fetch("/shedule/allocate-match", {
             method: "POST",
@@ -444,7 +422,6 @@ function renderAllocatedMatches() {
 // Initialize the page
 async function init() {
     try {
-
         let gender = 'Female';
         if(typeOfMatch == 'BS' || typeOfMatch == 'BD'){
             gender = 'Male';
@@ -468,7 +445,6 @@ async function init() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({gender}),
             });
-
             
             teamsData = await response.json();
             console.log(teamsData);
@@ -510,19 +486,16 @@ async function init() {
                 document.getElementById('chageTitle').innerText = 'Girls Doubles Match Allocation';
             }
         }
-        // matchCount = allocatedMatches.length;
-
 
         updateMatchNumber();
         generateTimeSlots();
-        // createDummyData();
+        populateRounds(); // Populate rounds dropdown
         updateDropdownOptions();
         renderAllocatedMatches();
     } catch (error) {
         console.log(error);
     }
 }
-
 
 function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toastContainer');

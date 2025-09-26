@@ -197,6 +197,25 @@ async function takePlayerInfo() {
         centralObj.doublesBoysMatchesList = data.doublesBoysMatchesList;
         centralObj.doublesGirlsMatchesList = data.doublesGirlsMatchesList;
 
+        console.log(centralObj.singlesPlayers);
+        console.log(centralObj.doublesPlayers);
+
+        // centralObj.singleBoysRegistrationList = centralObj.singlesPlayers.filter(player => 
+        //     player.gender === 'Male'
+        // ); 
+
+        // centralObj.singleGirlsRegistrationList = centralObj.singlesPlayers.filter(player => 
+        //     player.gender === 'Female'
+        // ); 
+
+        // centralObj.doublesBoysRegistrationList = centralObj.doublesPlayers.filter(player => 
+        //     player.gender === 'Male'
+        // ); 
+
+        // centralObj.doublesGirlsRegistrationList = centralObj.doublesPlayers.filter(player => 
+        //     player.gender === 'Male'
+        // ); 
+
         centralObj.allMatches = []
             .concat(
                 data.singlesBoysMatchesList,

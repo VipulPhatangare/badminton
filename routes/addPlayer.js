@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const { playerInfo } = require("../models/Player");
-const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter} = require("../models/Matches")
+const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter, singleBoysRounds, singleGirlsRounds, doublesBoysRounds, doublesGirlsRounds} = require("../models/Matches")
 
 
 
@@ -90,6 +90,57 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //   }
 // }
 
+// async function addRound() {
+//   try {
+//     const singleBoys = new singleBoysRounds({
+//       id: 'vipulPh',
+//       round1:[],
+//       round2: [],
+//       round3:[],
+//       round4:[],
+//       quaterFinale: [],
+//       semiFinale: [],
+//       finale: []
+//     });
+
+//     const singleGirls = new singleGirlsRounds({
+//       id: 'vipulPh',
+//       round1:[],
+//       round2: [],
+//       quaterFinale: [],
+//       semiFinale: [],
+//       finale: []
+//     });
+
+//     const doubleBoys = new doublesBoysRounds({
+//       id: 'vipulPh',
+//       round1:[],
+//       round2: [],
+//       round3:[],
+//       quaterFinale: [],
+//       semiFinale: [],
+//       finale: []
+//     });
+
+//     const doubleGirls = new doublesGirlsRounds({
+//       id: 'vipulPh',
+//       round1:[],
+//       quaterFinale: [],
+//       semiFinale: [],
+//       finale: []
+//     });
+
+//     await singleBoys.save();
+//     await singleGirls.save();
+//     await doubleBoys.save();
+//     await doubleGirls.save();
+//     return;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+
 // async function addMatchCounter() {
 //   try {
 //     const data = {
@@ -107,22 +158,30 @@ const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches
 //   }
 // }
 
-// router.get('/',async(req, res)=>{
-//   try {
-//     // await addMatchCounter();
-//     // await seed();
+router.get('/',async(req, res)=>{
+  try {
+    // await addMatchCounter();
+    // await seed();
 
-//     await doublesBoysMatches.updateMany(
-//     {}, // empty filter means all documents
-//     { $set: { nextRound: "Round2" } }
-//   );
+    await registerSingles.updateMany(
+      {}, 
+      { $set: { round: "round1" } }
+    );
 
-//     res.send('Api Not Woking');
+    await registerDoubles.updateMany(
+      {}, 
+      { $set: { round: "round1" } }
+    );
+
+    // await addRound();
+
+
+    res.send('Api Not Woking');
     
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { registerSingles, registerDoubles } = require("../models/Matches");
 const { playerInfo } = require("../models/Player");
+const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches, matchCounter, singleBoysRounds, singleGirlsRounds, doublesBoysRounds, doublesGirlsRounds} = require("../models/Matches")
 
 // Single registration
 router.get('/single-register', async (req, res) => {
@@ -20,7 +20,7 @@ router.get('/single-register', async (req, res) => {
             { new: true } 
         );
         let isAllocated = false;
-        const player = new registerSingles({ email, gender, isAllocated});
+        const player = new registerSingles({ email, gender, isAllocated, round: 'round1'});
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
     } catch (error) {
@@ -57,7 +57,7 @@ router.post('/double-register', async (req, res) => {
             { new: true } 
         );
         let isAllocated = false;
-        const player = new registerDoubles({ teamName, email1, email2, gender, isAllocated });
+        const player = new registerDoubles({ teamName, email1, email2, gender, isAllocated, round: 'round1'});
         await player.save();
         return res.json({ success: true, message: "Successfully registered." });
     } catch (error) {

@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const registerSinglesSchema = new mongoose.Schema({
     email: String,
     gender: String,
-    isAllocated: Boolean
+    isAllocated: Boolean,
+    round:String
 });
 
 
@@ -12,7 +13,8 @@ const registerDoublesSchema = new mongoose.Schema({
     email1: String,
     email2: String,
     gender: String,
-    isAllocated: Boolean
+    isAllocated: Boolean,
+    round:String
 });
 
 const singlesBoysMatchesSchema = new mongoose.Schema({
@@ -109,6 +111,48 @@ const doublesBoysMatchesSchema = new mongoose.Schema({
     isComplete: Boolean,
     matchType: String,
     nextRound:String
+
+});
+
+
+const singleBoysRoundsSchema = new mongoose.Schema({
+    id:String,
+    round1:Array,
+    round2: Array,
+    round3:Array,
+    round4:Array,
+    quaterFinale: Array,
+    semiFinale: Array,
+    finale: Array
+});
+
+const singleGirlsRoundsSchema = new mongoose.Schema({
+    id:String,
+    round1:Array,
+    round2: Array,
+    quaterFinale: Array,
+    semiFinale: Array,
+    finale: Array
+});
+
+
+const doublesBoysRoundsSchema = new mongoose.Schema({
+    id:String,
+    round1:Array,
+    round2: Array,
+    round3: Array,
+    quaterFinale: Array,
+    semiFinale: Array,
+    finale: Array
+});
+
+
+const doublesGirlsRoundsSchema = new mongoose.Schema({
+    id:String,
+    round1:Array,
+    quaterFinale: Array,
+    semiFinale: Array,
+    finale: Array
 });
 
 
@@ -130,6 +174,13 @@ const registerDoubles = mongoose.model('registerDoubles', registerDoublesSchema)
 
 const matchCounter = mongoose.model('matchCounter', matchCounterSchema);
 
+
+const singleBoysRounds = mongoose.model('singleBoysRounds', singleBoysRoundsSchema);
+const singleGirlsRounds = mongoose.model('singleGirlsRounds', singleGirlsRoundsSchema);
+const doublesBoysRounds = mongoose.model('doublesBoysRounds', doublesBoysRoundsSchema);
+const doublesGirlsRounds = mongoose.model('doublesGirlsRounds', doublesGirlsRoundsSchema);
+
+
 module.exports = {
     registerSingles, 
     registerDoubles, 
@@ -137,5 +188,9 @@ module.exports = {
     doublesGirlsMatches, 
     singlesGirlsMatches, 
     singlesBoysMatches,
-    matchCounter
+    matchCounter,
+    singleBoysRounds,
+    singleGirlsRounds,
+    doublesBoysRounds,
+    doublesGirlsRounds
 };

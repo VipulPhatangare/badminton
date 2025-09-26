@@ -205,6 +205,8 @@ router.post('/complete-match', async (req, res) => {
             { new: true }
         );
 
+        
+
         req.session.refree.isScorecard = false;
         return res.json({ success: true });
 

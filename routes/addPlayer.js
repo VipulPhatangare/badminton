@@ -163,15 +163,15 @@ router.get('/',async(req, res)=>{
     // await addMatchCounter();
     // await seed();
 
-    await registerSingles.updateMany(
-      {}, 
-      { $set: { round: "round1" } }
-    );
+    // await registerSingles.updateMany(
+    //   {}, 
+    //   { $set: { round: "round1" } }
+    // );
 
-    await registerDoubles.updateMany(
-      {}, 
-      { $set: { round: "round1" } }
-    );
+    // await registerDoubles.updateMany(
+    //   {}, 
+    //   { $set: { round: "round1" } }
+    // );
 
     // await addRound();
 

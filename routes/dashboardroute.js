@@ -359,12 +359,13 @@ router.post('/download-round-data', async(req, res) => {
 
             // Get team details
             for (const team of teams) {
+                // console.log(team);
                 const player1 = await playerInfo.findOne({ email: team.email1 });
                 const player2 = await playerInfo.findOne({ email: team.email2 });
                 
                 if (player1 && player2) {
                     teamDetails.push({
-                        teamName: `${player1.name} & ${player2.name}`,
+                        teamName: team.teamName,
                         player1: player1.name,
                         player2: player2.name
                     });

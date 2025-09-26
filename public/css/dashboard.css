@@ -1206,6 +1206,56 @@ select:focus, input:focus {
     padding: 20px 0;
 }
 
+/* Download Section Styles */
+.download-categories {
+    padding: 20px;
+}
+
+.category-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.category-section h3 {
+    color: var(--primary);
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.round-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.btn-excel {
+    background: #1d6f42;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-excel:hover {
+    background: #185c37;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(29, 111, 66, 0.2);
+}
+
+@media (max-width: 768px) {
+    .round-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+
 /* Style for logout modal specifically */
 #logoutModal .modal-content {
     text-align: center;

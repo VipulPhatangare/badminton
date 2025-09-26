@@ -35,6 +35,10 @@
                 <i class="fas fa-user-shield"></i>
                 <span>Referee</span>
             </div>
+            <div class="menu-item" data-section="downloads">
+                <i class="fas fa-file-excel"></i>
+                <span>Downloads</span>
+            </div>
             
         </div>
     </div>
@@ -216,6 +220,65 @@
                 </div>
             </div>
            
+            <!-- Download Excel Section -->
+            <div class="section-content" id="downloadsSection" style="display: none;">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Download Registration Data</h2>
+                    </div>
+                    <div class="download-categories">
+                        <!-- Boys Singles -->
+                        <div class="category-section">
+                            <h3>Boys Singles</h3>
+                            <div class="round-buttons">
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'round1')">Round 1</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'round2')">Round 2</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'round3')">Round 3</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'round4')">Round 4</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'quarter')">Quarter Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'semi')">Semi Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-singles', 'final')">Finals</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Girls Singles -->
+                        <div class="category-section">
+                            <h3>Girls Singles</h3>
+                            <div class="round-buttons">
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-singles', 'round1')">Round 1</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-singles', 'round2')">Round 2</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-singles', 'quarter')">Quarter Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-singles', 'semi')">Semi Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-singles', 'final')">Finals</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Boys Doubles -->
+                        <div class="category-section">
+                            <h3>Boys Doubles</h3>
+                            <div class="round-buttons">
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-doubles', 'round1')">Round 1</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-doubles', 'round2')">Round 2</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-doubles', 'quarter')">Quarter Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-doubles', 'semi')">Semi Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('boys-doubles', 'final')">Finals</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Girls Doubles -->
+                        <div class="category-section">
+                            <h3>Girls Doubles</h3>
+                            <div class="round-buttons">
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-doubles', 'round1')">Round 1</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-doubles', 'quarter')">Quarter Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-doubles', 'semi')">Semi Finals</button>
+                                <button class="btn btn-excel" onclick="downloadRoundData('girls-doubles', 'final')">Finals</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Admins/Referees Section -->
             <div class="section-content" id="adminsSection" style="display: none;">
                 <div class="section">

@@ -304,6 +304,117 @@ router.get('/get-refree-info', async(req, res)=>{
 });
 
 
+// Download round-wise registration data
+router.post('/download-round-data', async(req, res) => {
+    try {
+        const { category, round } = req.body;
+        const Excel = require('exceljs');
+        const workbook = new Excel.Workbook();
+        const worksheet = workbook.addWorksheet('Registration Data');
+
+        if (category.includes('singles')) {
+            // Set up columns for singles
+            worksheet.columns = [
+                { header: 'Player Name', key: 'name', width: 30 }
+            ];
+
+            const query = {
+                round: round,
+                gender: category.startsWith('boys') ? 'Male' : 'Female'
+            };
+
+            const players = await registerSingles.find(query);
+            const playerDetails = [];
+
+            // Get player details for each registration
+            for (const registration of players) {
+                const player = await playerInfo.findOne({ email: registration.email });
+                if (player) {
+                    playerDetails.push({
+                        name: player.name
+                    });
+                }
+            }
+
+            // Add data to worksheet
+            playerDetails.forEach(player => {
+                worksheet.addRow(player);
+            });
+
+        } else {
+            // Set up columns for doubles
+            worksheet.columns = [
+                { header: 'Team Name', key: 'teamName', width: 35 },
+                { header: 'Player 1', key: 'player1', width: 30 },
+                { header: 'Player 2', key: 'player2', width: 30 }
+            ];
+
+            const query = {
+                round: round,
+                gender: category.startsWith('boys') ? 'Male' : 'Female'
+            };
+
+            const teams = await registerDoubles.find(query);
+            const teamDetails = [];
+
+            // Get team details
+            for (const team of teams) {
+                const player1 = await playerInfo.findOne({ email: team.email1 });
+                const player2 = await playerInfo.findOne({ email: team.email2 });
+                
+                if (player1 && player2) {
+                    teamDetails.push({
+                        teamName: `${player1.name} & ${player2.name}`,
+                        player1: player1.name,
+                        player2: player2.name
+                    });
+                }
+            }
+
+            // Add data to worksheet
+            teamDetails.forEach(team => {
+                worksheet.addRow(team);
+            });
+        }
+
+        // Style the worksheet
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '1a3c6e' }
+        };
+        worksheet.getRow(1).font = { color: { argb: 'FFFFFF' }, bold: true };
+
+        // Add borders to all cells
+        worksheet.eachRow((row, rowNumber) => {
+            row.eachCell(cell => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            });
+        });
+
+        // Generate Excel file
+        const buffer = await workbook.xlsx.writeBuffer();
+        
+        // Set response headers
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=registration-data.xlsx');
+        
+        // Send the file
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Error generating Excel file:', error);
+        res.status(500).json({ error: 'Error generating Excel file' });
+    }
+});
+
 router.post('/add-refree', async(req, res)=>{
   try {
     const refree = req.body;

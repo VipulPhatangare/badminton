@@ -1098,6 +1098,11 @@ menuItems.forEach(item => {
         // Update page title
         pageTitle.textContent = this.querySelector('span').textContent;
 
+        // Show downloads section if selected
+        if (section === 'downloads') {
+            document.getElementById('downloadsSection').style.display = 'block';
+        }
+
         // Close sidebar on mobile after selection
         if (window.innerWidth <= 576) {
             sidebar.classList.remove('active');
@@ -1670,6 +1675,117 @@ function showLogoutSuccess() {
             }
         }, 500);
     }, 3000);
+}
+
+// Function to show notifications
+function showNotification(message, type = 'info') {
+    // Remove any existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+        notification.remove();
+    });
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    // Set background color based on type
+    let backgroundColor = '';
+    let icon = '';
+    switch(type) {
+        case 'success':
+            backgroundColor = '#2a9d8f';
+            icon = 'fa-check-circle';
+            break;
+        case 'error':
+            backgroundColor = '#e74c3c';
+            icon = 'fa-exclamation-circle';
+            break;
+        case 'info':
+            backgroundColor = '#3498db';
+            icon = 'fa-info-circle';
+            break;
+        default:
+            backgroundColor = '#3498db';
+            icon = 'fa-info-circle';
+    }
+
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${backgroundColor};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.5s ease-out;
+    `;
+
+    notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.2rem;"></i>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.5s ease-out';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 500);
+    }, 3000);
+}
+
+// Download round-wise registration data
+async function downloadRoundData(category, round) {
+    try {
+        // Show loading notification
+        showNotification('Generating registration data...', 'info');
+        
+        const response = await fetch('/dashboard/download-round-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category,
+                round
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        
+        // Generate filename
+        const date = new Date().toISOString().split('T')[0];
+        const filename = `${category}-${round}-registrations-${date}.xlsx`;
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        // Show success notification
+        showNotification('Excel file downloaded successfully!', 'success');
+    } catch (error) {
+        console.error('Error downloading Excel file:', error);
+        showNotification('Error generating Excel file. Please try again.', 'error');
+    }
 }
 
 // Close logout modal when clicking outside

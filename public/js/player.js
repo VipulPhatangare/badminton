@@ -61,7 +61,7 @@ async function initPage() {
         document.getElementById('dbplayer1').value = playerInfo.name;
         const response1 = await fetch('/player/allPlayerInfo')
         const data1 = await response1.json();
-        // console.log(data1);
+        console.log(data1);
         players = data1.map((element, index) => ({
             id: index + 1,
             name: element.name,
@@ -115,105 +115,65 @@ async function initPage() {
 
         // Show appropriate content based on registration status
         if (!playerRegistrationStatus.singles && !playerRegistrationStatus.doubles) {
-            // Not registered for any match type
-            registrationPrompt.style.display = 'block';
-            matchesSection.style.display = 'none';
-            noUpcomingMatches.style.display = 'none';
-            noCompletedMatches.style.display = 'none';
+          // Not registered for any match type - Show registration closed message
+          registrationPrompt.style.display = 'block';
+          matchesSection.style.display = 'none';
+          noUpcomingMatches.style.display = 'none';
+          noCompletedMatches.style.display = 'none';
+          
+          // Update registration prompt to show closed message
+          registrationPrompt.innerHTML = `
+              <i class="fas fa-lock"></i>
+              <h2>Registration Closed</h2>
+              <p>Tournament registration is now closed for all categories. You cannot register for any matches at this time.</p>
+              <div class="registration-closed-info">
+                  <p><strong>Note:</strong> The registration period has ended.</p>
+              </div>
+          `;
         } else {
             // Registered for at least one match type
             registrationPrompt.style.display = 'none';
             matchesSection.style.display = 'block';
             loadMatches();
         }
-    } catch (error) {
-        console.log(error);   
-    }
-}
+            } catch (error) {
+                console.log(error);   
+            }
+        }
 
-// Update registration status display
+// Update registration status display - REGISTRATION CLOSED FOR ALL
 function updateRegistrationStatus() {
   registrationStatus.innerHTML = '';
   registerButtons.innerHTML = '';
 
-  // Show current registration status badges
+  // Show registration closed message for all players
+  const closedMessage = document.createElement('div');
+  closedMessage.className = 'registration-closed-message';
+  closedMessage.innerHTML = `
+    <i class="fas fa-lock"></i>
+    <div>
+      <h3>Registration Closed</h3>
+      <p>Tournament registration is now closed for all categories.</p>
+    </div>
+  `;
+  registrationStatus.appendChild(closedMessage);
+
+  // Hide register buttons completely
+  registerButtons.style.display = 'none';
+
+  // Show current registration status badges if already registered
   if (playerRegistrationStatus.singles) {
     const badge = document.createElement('div');
     badge.className = 'status-badge status-singles';
     badge.innerHTML = '<i class="fas fa-user"></i> Registered for Singles';
     registrationStatus.appendChild(badge);
-
-    // Add doubles registration button for female players if not already registered for doubles
-    if (!playerRegistrationStatus.doubles && playerInfo.gender === 'Female') {
-      const doublesBtn = document.createElement('button');
-      doublesBtn.className = 'register-match-btn';
-      doublesBtn.setAttribute('data-type', 'doubles');
-      doublesBtn.innerHTML = 'Register for Doubles';
-      doublesBtn.addEventListener('click', () => {
-        doublesModal.classList.add('active');
-      });
-      registerButtons.appendChild(doublesBtn);
-    }
-  } 
-  else if (playerRegistrationStatus.doubles) {
-    const badge = document.createElement('div');
-    badge.className = 'status-badge status-doubles';
-    badge.innerHTML = `<i class="fas fa-users"></i> Registered for Doubles: ${playerRegistrationStatus.teamName} (with ${playerRegistrationStatus.playerName2})`;
-    registrationStatus.appendChild(badge);
-
-    // Add singles registration button if not registered for singles
-    if (!playerRegistrationStatus.singles) {
-      const singlesBtn = document.createElement('button');
-      singlesBtn.className = 'register-match-btn';
-      singlesBtn.setAttribute('data-type', 'singles');
-      singlesBtn.innerHTML = 'Register for Singles';
-      singlesBtn.addEventListener('click', () => {
-        singlesModal.classList.add('active');
-      });
-      registerButtons.appendChild(singlesBtn);
-    }
-  } 
-  else {
-    // Show initial registration buttons
-    const singlesBtn = document.createElement('button');
-    singlesBtn.className = 'register-match-btn';
-    singlesBtn.setAttribute('data-type', 'singles');
-    singlesBtn.innerHTML = 'Register for Singles';
-    singlesBtn.addEventListener('click', () => {
-      singlesModal.classList.add('active');
-    });
-    registerButtons.appendChild(singlesBtn);
-
-    // Show doubles button only for female players
-    if (playerInfo.gender === 'Female') {
-      const doublesBtn = document.createElement('button');
-      doublesBtn.className = 'register-match-btn';
-      doublesBtn.setAttribute('data-type', 'doubles');
-      doublesBtn.innerHTML = 'Register for Doubles';
-      doublesBtn.addEventListener('click', () => {
-        doublesModal.classList.add('active');
-      });
-      registerButtons.appendChild(doublesBtn);
-    }
   }
-
+  
   if (playerRegistrationStatus.doubles) {
     const badge = document.createElement('div');
     badge.className = 'status-badge status-doubles';
     badge.innerHTML = `<i class="fas fa-users"></i> Registered for Doubles: ${playerRegistrationStatus.teamName} (with ${playerRegistrationStatus.playerName2})`;
     registrationStatus.appendChild(badge);
-
-    // Add register for singles button
-    if (!playerRegistrationStatus.singles) {
-      const singlesBtn = document.createElement('button');
-      singlesBtn.className = 'register-match-btn';
-      singlesBtn.setAttribute('data-type', 'singles');
-      singlesBtn.innerHTML = 'Register for Singles';
-      singlesBtn.addEventListener('click', () => {
-        singlesModal.classList.add('active');
-      });
-      registerButtons.appendChild(singlesBtn);
-    }
   }
 }
 
@@ -527,49 +487,63 @@ navHome.forEach(btn => {
 });
 
 // Register Match buttons
+// registerTypeBtns.forEach(btn => {
+//   btn.addEventListener('click', (e) => {
+//     const type = e.target.getAttribute('data-type');
+    
+//     // Check if already registered
+//     if ((type === 'singles' && playerRegistrationStatus.singles) || 
+//         (type === 'doubles' && playerRegistrationStatus.doubles)) {
+//       showNotification(`You are already registered for ${type} matches.`, 'warning');
+//       return;
+//     }
+    
+//     // Handle registration based on type
+//     if (type === 'singles') {
+//       singlesModal.classList.add('active');
+//     } else if (type === 'doubles') {
+//       // Only allow doubles registration for female players
+//       if (playerInfo.gender === 'Male') {
+//         showNotification('Boys Doubles registration is currently closed.', 'info');
+//         return;
+//       }
+//       doublesModal.classList.add('active');
+//     }
+//   });
+// });
+
+// Register Match buttons - DISABLED (Registration Closed)
 registerTypeBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
-    const type = e.target.getAttribute('data-type');
-    
-    // Check if already registered
-    if ((type === 'singles' && playerRegistrationStatus.singles) || 
-        (type === 'doubles' && playerRegistrationStatus.doubles)) {
-      showNotification(`You are already registered for ${type} matches.`, 'warning');
-      return;
-    }
-    
-    // Handle registration based on type
-    if (type === 'singles') {
-      singlesModal.classList.add('active');
-    } else if (type === 'doubles') {
-      // Only allow doubles registration for female players
-      if (playerInfo.gender === 'Male') {
-        showNotification('Boys Doubles registration is currently closed.', 'info');
-        return;
-      }
-      doublesModal.classList.add('active');
-    }
+    e.preventDefault();
+    showNotification('Registration is closed for all categories. No new registrations are being accepted.', 'info');
   });
 });
 
 // Confirm singles registration
-confirmSingles.addEventListener('click', async() => {
-    try {
-        const response = await fetch("/register/single-register")
-        const data = await response.json();
-        if(data.success){
-            playerRegistrationStatus.singles = true;
-            //   localStorage.setItem('playerRegistrationStatus', JSON.stringify(playerRegistrationStatus));
+// confirmSingles.addEventListener('click', async() => {
+//     try {
+//         const response = await fetch("/register/single-register")
+//         const data = await response.json();
+//         if(data.success){
+//             playerRegistrationStatus.singles = true;
+//             //   localStorage.setItem('playerRegistrationStatus', JSON.stringify(playerRegistrationStatus));
 
-            singlesModal.classList.remove('active');
-            showSuccessModal();
-        }else{
-            showNotification(data.message, 'error');
-        }
+//             singlesModal.classList.remove('active');
+//             showSuccessModal();
+//         }else{
+//             showNotification(data.message, 'error');
+//         }
         
-    } catch (error) {
-        console.log(error);
-    }
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
+
+
+confirmSingles.addEventListener('click', (e) => {
+    e.preventDefault();
+    showNotification('Registration is closed. Cannot register for singles matches.', 'info');
 });
 
 // Search partner functionality
@@ -588,52 +562,58 @@ teamName.addEventListener('input', checkDoublesFormValidity);
 
 // Confirm doubles registration
 
-confirmDoubles.addEventListener('click', async() => {
-    try {
-        const partnerName = selectedPartner.value.split(' (')[0];
+// confirmDoubles.addEventListener('click', async() => {
+//     try {
+//         const partnerName = selectedPartner.value.split(' (')[0];
 
-        // Find the full partner object by matching the name or ID
-        const partner = players.find(
-            p => p.id === parseInt(selectedPartnerId.value) || p.name === partnerName
-        );
+//         // Find the full partner object by matching the name or ID
+//         const partner = players.find(
+//             p => p.id === parseInt(selectedPartnerId.value) || p.name === partnerName
+//         );
 
-        let tname = teamName.value;
-        let email2 = partner.email;
-        let email1 = playerInfo.email;
-        let gender = playerInfo.gender;
+//         let tname = teamName.value;
+//         let email2 = partner.email;
+//         let email1 = playerInfo.email;
+//         let gender = playerInfo.gender;
         
-        // Check if it's boys doubles and show registration closed message
-        if (gender === 'Male') {
-            showNotification('Boys Doubles registration is currently closed.', 'error');
-            doublesModal.classList.remove('active');
-            return;
-        }
+//         // Check if it's boys doubles and show registration closed message
+//         if (gender === 'Male') {
+//             showNotification('Boys Doubles registration is currently closed.', 'error');
+//             doublesModal.classList.remove('active');
+//             return;
+//         }
         
-        const response = await fetch("/register/double-register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({tname, email2, email1, gender}),
-        });
+//         const response = await fetch("/register/double-register", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({tname, email2, email1, gender}),
+//         });
         
-        const data = await response.json();
+//         const data = await response.json();
         
-        if(data.success){
-            // Update registration status
-            playerRegistrationStatus.doubles = true;
-            playerRegistrationStatus.playerName2 = partnerName;
-            playerRegistrationStatus.teamName = teamName.value;
+//         if(data.success){
+//             // Update registration status
+//             playerRegistrationStatus.doubles = true;
+//             playerRegistrationStatus.playerName2 = partnerName;
+//             playerRegistrationStatus.teamName = teamName.value;
 
 
-            doublesModal.classList.remove('active');
-            showSuccessModal();
-        }else{
-            showNotification(data.message, 'error');
-        }
+//             doublesModal.classList.remove('active');
+//             showSuccessModal();
+//         }else{
+//             showNotification(data.message, 'error');
+//         }
 
-    } catch (error) {
-        console.log(error);
-    }
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
+
+confirmDoubles.addEventListener('click', (e) => {
+    e.preventDefault();
+    showNotification('Registration is closed. Cannot register for doubles matches.', 'info');
 });
+
 
 // Show success modal
 function showSuccessModal() {

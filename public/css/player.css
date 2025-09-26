@@ -1764,3 +1764,47 @@ body.mobile-nav-open {
         font-size: 1.6rem;
     }
 }
+
+
+/* Registration Closed Styles */
+.registration-closed-message {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #6c757d;
+    border-radius: var(--border-radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.registration-closed-message i {
+    font-size: 2.5rem;
+    color: #6c757d;
+}
+
+.registration-closed-message h3 {
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 1.3rem;
+}
+
+.registration-closed-message p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.registration-closed-info {
+    background: rgba(108, 117, 125, 0.1);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-top: 15px;
+    border-left: 4px solid #6c757d;
+}
+
+.registration-closed-info p {
+    margin: 0;
+    color: #495057;
+    font-size: 0.95rem;
+}

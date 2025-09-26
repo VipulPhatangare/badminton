@@ -61,10 +61,22 @@ h1 {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--dark-red);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     text-align: center;
     background: var(--gradient-red);
     color: white;
+    padding: 10px;
+    border-radius: var(--border-radius);
+}
+
+.current-round {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-red);
+    margin-bottom: 20px;
+    text-align: center;
+    background: var(--light-gray);
+    border: 2px solid var(--primary-red);
     padding: 10px;
     border-radius: var(--border-radius);
 }
@@ -149,6 +161,46 @@ label {
     margin-bottom: 10px;
     font-weight: bold;
     color: var(--dark-gray);
+}
+
+.round-display {
+    font-size: 1.2rem;
+    color: var(--primary-red);
+    font-weight: bold;
+    padding: 8px 12px;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.round-navigation {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.round-nav-btn {
+    padding: 8px 16px;
+    background-color: var(--primary-red);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: bold;
+    transition: var(--transition-fast);
+    flex: 1;
+}
+
+.round-nav-btn:hover:not(:disabled) {
+    background-color: var(--dark-red);
+    transform: translateY(-1px);
+}
+
+.round-nav-btn:disabled {
+    background-color: var(--gray);
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .match-details {
@@ -242,7 +294,7 @@ label {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-heavy);
     max-width: 500px;
-    width: 100%;
+    width: 90%;
 }
 
 .modal-header {
@@ -300,6 +352,30 @@ label {
     background-color: var(--danger);
     color: white;
     border: none;
+}
+
+#roundsInput {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--gray);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    margin-top: 10px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+#roundsInput:focus {
+    border-color: var(--primary-red);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(178, 34, 34, 0.2);
+}
+
+.hint {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin-top: 5px;
+    font-style: italic;
 }
 
 .toast-container {
@@ -366,5 +442,14 @@ label {
     
     .match-details {
         grid-template-columns: 1fr;
+    }
+    
+    .round-navigation {
+        flex-direction: column;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 20px;
     }
 }

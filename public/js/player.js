@@ -136,14 +136,56 @@ function updateRegistrationStatus() {
   registrationStatus.innerHTML = '';
   registerButtons.innerHTML = '';
 
+  // Show current registration status badges
   if (playerRegistrationStatus.singles) {
     const badge = document.createElement('div');
     badge.className = 'status-badge status-singles';
     badge.innerHTML = '<i class="fas fa-user"></i> Registered for Singles';
     registrationStatus.appendChild(badge);
 
-    // Add register for doubles button
-    if (!playerRegistrationStatus.doubles) {
+    // Add doubles registration button for female players if not already registered for doubles
+    if (!playerRegistrationStatus.doubles && playerInfo.gender === 'Female') {
+      const doublesBtn = document.createElement('button');
+      doublesBtn.className = 'register-match-btn';
+      doublesBtn.setAttribute('data-type', 'doubles');
+      doublesBtn.innerHTML = 'Register for Doubles';
+      doublesBtn.addEventListener('click', () => {
+        doublesModal.classList.add('active');
+      });
+      registerButtons.appendChild(doublesBtn);
+    }
+  } 
+  else if (playerRegistrationStatus.doubles) {
+    const badge = document.createElement('div');
+    badge.className = 'status-badge status-doubles';
+    badge.innerHTML = `<i class="fas fa-users"></i> Registered for Doubles: ${playerRegistrationStatus.teamName} (with ${playerRegistrationStatus.playerName2})`;
+    registrationStatus.appendChild(badge);
+
+    // Add singles registration button if not registered for singles
+    if (!playerRegistrationStatus.singles) {
+      const singlesBtn = document.createElement('button');
+      singlesBtn.className = 'register-match-btn';
+      singlesBtn.setAttribute('data-type', 'singles');
+      singlesBtn.innerHTML = 'Register for Singles';
+      singlesBtn.addEventListener('click', () => {
+        singlesModal.classList.add('active');
+      });
+      registerButtons.appendChild(singlesBtn);
+    }
+  } 
+  else {
+    // Show initial registration buttons
+    const singlesBtn = document.createElement('button');
+    singlesBtn.className = 'register-match-btn';
+    singlesBtn.setAttribute('data-type', 'singles');
+    singlesBtn.innerHTML = 'Register for Singles';
+    singlesBtn.addEventListener('click', () => {
+      singlesModal.classList.add('active');
+    });
+    registerButtons.appendChild(singlesBtn);
+
+    // Show doubles button only for female players
+    if (playerInfo.gender === 'Female') {
       const doublesBtn = document.createElement('button');
       doublesBtn.className = 'register-match-btn';
       doublesBtn.setAttribute('data-type', 'doubles');
@@ -488,13 +530,23 @@ navHome.forEach(btn => {
 registerTypeBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     const type = e.target.getAttribute('data-type');
-    if ((type === 'singles' && playerRegistrationStatus.singles) || (type === 'doubles' && playerRegistrationStatus.doubles)) {
+    
+    // Check if already registered
+    if ((type === 'singles' && playerRegistrationStatus.singles) || 
+        (type === 'doubles' && playerRegistrationStatus.doubles)) {
       showNotification(`You are already registered for ${type} matches.`, 'warning');
       return;
     }
+    
+    // Handle registration based on type
     if (type === 'singles') {
       singlesModal.classList.add('active');
-    } else {
+    } else if (type === 'doubles') {
+      // Only allow doubles registration for female players
+      if (playerInfo.gender === 'Male') {
+        showNotification('Boys Doubles registration is currently closed.', 'info');
+        return;
+      }
       doublesModal.classList.add('active');
     }
   });
@@ -549,6 +601,14 @@ confirmDoubles.addEventListener('click', async() => {
         let email2 = partner.email;
         let email1 = playerInfo.email;
         let gender = playerInfo.gender;
+        
+        // Check if it's boys doubles and show registration closed message
+        if (gender === 'Male') {
+            showNotification('Boys Doubles registration is currently closed.', 'error');
+            doublesModal.classList.remove('active');
+            return;
+        }
+        
         const response = await fetch("/register/double-register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -714,4 +774,12 @@ function showNotification(message, type = 'info') {
 
 document.addEventListener("DOMContentLoaded",async () => {
     await initPage();
+    
+    // Handle visibility of doubles registration elements based on gender
+    if (playerInfo && playerInfo.gender === 'Male') {
+        const doublesRegistrationElements = document.querySelectorAll('[data-type="doubles"]');
+        doublesRegistrationElements.forEach(element => {
+            element.style.display = 'none';
+        });
+    }
 });

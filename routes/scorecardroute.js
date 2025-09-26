@@ -3,6 +3,10 @@ const router = express.Router();
 const { playerInfo, refreeInfo } = require("../models/Player");
 const {registerSingles, registerDoubles, doublesBoysMatches, doublesGirlsMatches, singlesGirlsMatches, singlesBoysMatches} = require("../models/Matches")
 
+
+
+
+
 router.get('/',(req, res)=>{
     if(req.session.refree.isScorecard){
         res.render('scorecard');
@@ -175,6 +179,12 @@ router.post('/complete-match', async (req, res) => {
         if (matchType === 'Boys Doubles') model = doublesBoysMatches;
         if (matchType === 'Girls Doubles') model = doublesGirlsMatches;
 
+        let gender;
+        if (matchType === 'Boys Singles') gender = 'Male';
+        if (matchType === 'Girls Singles') gender = 'Female';
+        if (matchType === 'Boys Doubles') gender = 'Male';
+        if (matchType === 'Girls Doubles') gender = 'Female';
+
         if (!model) return res.json({ success: false });
 
         // console.log('match complet info: ');
@@ -204,6 +214,18 @@ router.post('/complete-match', async (req, res) => {
             },
             { new: true }
         );
+
+
+        if((matchType === 'Boys Singles') || (matchType === 'Girls Singles')){
+
+
+            let nextRound;
+            
+            const player = new registerSingles({ email: winEmail, gender: gender, isAllocated: false, round: nextRound});
+            await player.save();
+        }else{
+
+        }
 
         
 

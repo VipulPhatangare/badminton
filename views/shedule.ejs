@@ -8,10 +8,29 @@
     <link rel="stylesheet" href="/css/shedule.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Rounds Input Popup -->
+    <div class="modal" id="roundsInputModal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Enter Tournament Rounds</h2>
+            </div>
+            <div class="confirmation-details">
+                <p>Please enter the rounds for the tournament (comma separated):</p>
+                <textarea id="roundsInput" rows="6" placeholder="e.g., Round 1, Round 2, Quarter Final, Semi Final, Final"></textarea>
+                <p class="hint">Example: Round 1, Round 2, Round 3, Quarter Final, Semi Final, Final</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="useDefaultRounds()">Use Default</button>
+                <button class="modal-btn confirm-btn" onclick="saveRounds()">Save Rounds</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="display: none;" id="mainContainer">
         <header>
             <h1 id="chageTitle"></h1>
             <div class="match-number">Match Number: <span id="matchNumber">5</span></div>
+            <div class="current-round">Current Round: <span id="currentRoundDisplay">Round 1</span></div>
         </header>
 
         <div class="form-container">
@@ -42,10 +61,11 @@
                     </select>
                 </div>
                 <div class="detail-group">
-                    <label for="round">Round:</label>
-                    <select id="round">
-                        <!-- Rounds will be populated by JavaScript -->
-                    </select>
+                    <label>Round: <span id="currentRound" class="round-display">Round 1</span></label>
+                    <div class="round-navigation">
+                        <button class="round-nav-btn" onclick="previousRound()">← Previous</button>
+                        <button class="round-nav-btn" onclick="nextRound()">Next →</button>
+                    </div>
                 </div>
             </div>
 
